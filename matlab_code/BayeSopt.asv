@@ -1,0 +1,20 @@
+clc; clear; close all;
+
+% 定义目标函数
+objectiveFcn = @(X) TargetFunc(X.weight1,X.weight2,X.weight3,X.weight4,X.initDirection1, ...
+    X.initDirection2,X.initDirection3);
+
+% 定义优化变量 (搜索空间)
+vars = optimizableVariable('weight1',[0,1],'weight2',[0,1],'weight3',[0,1],'weight4',[0,1], ...
+                    'initDirection1',[0,1],'weight1',[0,1],'weight1',[0,1],'Type','real');
+
+% 运行贝叶斯优化
+results = bayesopt(objectiveFcn, vars, ...
+    'AcquisitionFunctionName', 'expected-improvement-plus', ...
+    'MaxObjectiveEvaluations', 30, ...
+    'Verbose', 1);
+
+% 显示最优解
+bestX = results.XAtMinObjective;
+bestFval = results.MinObjective;
+fprintf('最优解: x = %.4f, f(x) = %.4f\n', bestX.x, bestFval);

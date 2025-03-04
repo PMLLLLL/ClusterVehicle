@@ -6,16 +6,22 @@ classdef CEDAS
         rad;
         decay;
         weights;
+        refreshDirWei;
+        scoreWei;
+        centerWei;
     end
 
     methods(Access = public)
-        function obj = CEDAS(rad, decay,weights, initDirection)
+        function obj = CEDAS(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerwei)
            % 新建类，将簇初始化 初始长度为0
            obj.clusters = struct('Data', {}, 'Centre', {}, 'Life', {}, 'Direction', {});
            obj.rad = rad;
            obj.decay = decay;
            obj.weights = weights;
            obj.initDirection = initDirection;
+           obj.refreshDirWei = refreshdirWei;
+           obj.scoreWei = scorewei;
+           obj.centerWei = centerwei;
         end
 
         function obj = Clustering(obj,sample)
@@ -65,7 +71,7 @@ classdef CEDAS
                 NormDist = distances(i) / obj.rad;
                 
                 % 计算收益
-                score = 0.2 * (1 - NormDist) + 0.8 * CosSim;
+                score = obj.scoreWei(1) * (1 - NormDist) + obj.scoreWei(2) * CosSim;
                 
                 % 更新最佳簇索引
                 if score > bestScore
@@ -113,7 +119,7 @@ classdef CEDAS
         
             % 更新簇中心
             direction = (newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3)) / obj.rad;
-            obj.clusters(clusterIndex).Centre(1:3) = obj.clusters(clusterIndex).Centre(1:3) + 0.1 * direction; %增加新加入的权重
+            obj.clusters(clusterIndex).Centre(1:3) = obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei(2) * direction; %增加新加入的权重
         
             % 更新磁场值
             obj.clusters(clusterIndex).Centre(4) = mean([obj.clusters(clusterIndex).Centre(4) newSample(4)]);
@@ -126,7 +132,7 @@ classdef CEDAS
         function obj = UpdateClusterDirection(obj, clusterIndex,newSample)
             % 使用当前簇方向和新样本的方向加权更新
             direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
-            newDirection = 0.5 * obj.clusters(clusterIndex).Direction + 0.5 * (direction / norm(direction));
+            newDirection = obj.refreshDirWei(1) * obj.clusters(clusterIndex).Direction + obj.refreshDirWei(2) * (direction / norm(direction));
             obj.clusters(clusterIndex).Direction = newDirection / norm(newDirection); % 归一化
         end
     end
