@@ -14,7 +14,7 @@ classdef Visualize
             obj.trueLabels = trueLabels;
             obj.clusterLabels = clusterLabels;
             %计算混淆矩阵
-            obj.ContingencyMatrix = ContingencyMatrix;
+            obj.ContingencyMatrix = Contingency(obj);
         end
 
         % 显示聚类结果的图
@@ -89,5 +89,21 @@ classdef Visualize
             title('Confusion Matrix');
             colormap(parula(10)); % 设置颜色
         end
+
+        function [contingencyMatrix] = Contingency(obj)
+            % 计算混淆矩阵
+            n = length(obj.trueLabels);
+            uniqueTrueLabels = unique(obj.trueLabels); % 真实标签的唯一值
+            uniquePredLabels = unique(obj.clusterLabels); % 预测标签的唯一值
+            contingencyMatrix = zeros(length(uniqueTrueLabels), length(uniquePredLabels)); % 初始化混淆矩阵
+            
+            % 遍历样本，填充混淆矩阵
+            for i = 1:n
+                trueIdx = find(uniqueTrueLabels == obj.trueLabels(i));   % 找到真实标签的索引
+                predIdx = find(uniquePredLabels == obj.clusterLabels(i));   % 找到预测标签的索引
+                contingencyMatrix(trueIdx, predIdx) = contingencyMatrix(trueIdx, predIdx) + 1;
+            end
+        end
+
     end
 end

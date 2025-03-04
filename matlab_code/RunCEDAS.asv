@@ -43,15 +43,13 @@ for WeightNum = 1:4
             CE = CE.Clustering(DataOper.normalizedData(t,:));
         end
     
-        % 计算真实标签和混淆矩阵
-        DataOper = DataOper.GetLabel(CE.clusters);
-        DataOper = DataOper.GetContingencyMatrix();
+        % 可视化
+        DataOper.GetLabel(CE.clusters);
 
-        % 初始化显示类
-        show = Visualize(CE.clusters,DataOper.trueLabels,DataOper.clusterLabels,DataOper.contingencyMatrix);
-        show.ContingencyHeatMap1();
-        show.ContingencyHeatMap2();
-        show.ClustersImg;
+        % show = Visualize(CE.clusters);
+        % show.ContingencyHeatMap1();
+        % show.ContingencyHeatMap2();
+        % show.ClustersImg;
         % 计算分类准确度RI
         RI(i) = RandIndex(DataOper.trueLabels,DataOper.clusterLabels);
     
