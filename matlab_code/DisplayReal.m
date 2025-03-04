@@ -1,8 +1,8 @@
 % 数据加载与归一化
 %DataIn = readmatrix('../2025.2.25 大车数据合并_真实标签.xlsx'); % 读取文件数据 D:\1.project\2.融合组\code
 %DataIn = readmatrix('D:/1.project/2.融合组/code/车辆赣C69900所在片段处理后加磁场.csv'); % 读取文件数据
-%DataIn = readmatrix('../2025.3.3 85个数据汇总_标签.xlsx');
-DataIn = readmatrix('../2025.3.4 11-20个数据汇总_标签.xlsx');
+DataIn = readmatrix('../2025.3.3 85个数据汇总_标签.xlsx');
+%DataIn = readmatrix('../2025.3.4 11-20个数据汇总_标签.xlsx');
 
 % 数据真实标签放在第五列，并且同样的标签数据放在一起
 NormalizedData = NormalizeData(DataIn);

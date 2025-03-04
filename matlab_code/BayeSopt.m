@@ -24,17 +24,33 @@ vars = [
     optimizableVariable('rad', [0, 15], 'Type', 'real')
 ];
 
+% 定义约束函数 (确保 x1 + x2 + x3 = 1)
+constraintFcn = @(X) deal(abs(X.weight1 + X.weight2 + X.weight3 + X.weight4 - 1), ...
+                          abs(X.initDirection1 + X.initDirection2 + X.initDirection3 - 1), ...
+                          abs(X.scoreWei1 + X.scoreWei2 - 1), ...
+                          abs(X.refreshDirWei1 + X.refreshDirWei2 - 1),[]); 
+
+
+numRuns = 5;
+bestSolutions = cell(numRuns,1);
+
 % 运行贝叶斯优化
-results = bayesopt(objectiveFcn, vars, ...
-    'AcquisitionFunctionName', 'expected-improvement-plus', ...
-    'MaxObjectiveEvaluations', 30, ...
-    'Verbose', 1);
+for i=1:numRuns
+    results = bayesopt(objectiveFcn, vars, ...
+        'AcquisitionFunctionName', 'expected-improvement-plus', ...
+        'MaxObjectiveEvaluations', 10, ...
+        'Verbose', 1);
+    
+    % 显示最优解
+    % bestX = results.XAtMinObjective;
+    % bestFval = results.MinObjective;
+    bestSolutions{i} = results;
+end
 
-% 显示最优解
-bestX = results.XAtMinObjective;
-bestFval = results.MinObjective;
+% fprintf('最优解:\n');
+% disp(bestX);
+% fprintf('最小目标函数值: %.4f\n', bestFval);
 
-fprintf('最优解:\n');
-disp(bestX);
-fprintf('最小目标函数值: %.4f\n', bestFval);
+disp(bestSolutions);
+
 
