@@ -9,6 +9,9 @@ decay = 0.000001; % 衰减因子
 % 初始权重
 weights = [(1-0.98)/3, 0.98, (1-0.98)/3, (1-0.98)/3]; % 时间戳、位置、磁场值、车道号
 initDirection = [1 0 1];
+refreshDirWei = [0.5 0.5];
+scoreWei = [0.2 0.8];
+centerWei = [1 0.1];
 
 path = '../2025.3.3 85个数据汇总_标签.xlsx';
 
@@ -26,7 +29,11 @@ DataOper = DataProcessing(path);
 RI = zeros(1,length(DataOper.normalizedData(:,1)));
 
 % 聚类处理
-CE = CEDAS(rad, decay,weights, initDirection); % 用于存储聚类结果
+CE = CEDAS(rad, decay,weights, ...
+            initDirection, ...
+            refreshDirWei, ...
+            scoreWei, ...
+            centerWei); % 用于存储聚类结果
 
 for t = 1:size(DataOper.normalizedData, 1)
     % 调用 CEDAS_demo3 算法
