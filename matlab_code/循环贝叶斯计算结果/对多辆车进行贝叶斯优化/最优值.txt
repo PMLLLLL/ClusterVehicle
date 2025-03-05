@@ -1,0 +1,7 @@
+最优解:
+    weight1    weight2    weight3    weight4    initDirection1    initDirection2    initDirection3    refreshDirWei1    refreshDirWei2    scoreWei1    scoreWei2    centerWei1    centerWei2     rad  
+    _______    _______    _______    _______    ______________    ______________    ______________    ______________    ______________    _________    _________    __________    __________    ______
+
+    0.21746    0.22789    0.96373    0.75239       0.70512            0.5611           0.65681           0.30789           0.81389         0.25726      0.13327      0.86614       0.88882      1.5393
+
+最小目标函数值: -0.9948

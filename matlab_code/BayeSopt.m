@@ -31,26 +31,44 @@ constraintFcn = @(X) deal(abs(X.weight1 + X.weight2 + X.weight3 + X.weight4 - 1)
                           abs(X.refreshDirWei1 + X.refreshDirWei2 - 1),[]); 
 
 
-numRuns = 5;
+% 循环次数
+numRuns = 10;
 bestSolutions = cell(numRuns,1);
+
+
 
 % 运行贝叶斯优化
 for i=1:numRuns
     results = bayesopt(objectiveFcn, vars, ...
         'AcquisitionFunctionName', 'expected-improvement-plus', ...
-        'MaxObjectiveEvaluations', 10, ...
+        'MaxObjectiveEvaluations', 100, ...
         'Verbose', 1);
     
     % 显示最优解
     % bestX = results.XAtMinObjective;
     % bestFval = results.MinObjective;
     bestSolutions{i} = results;
+
 end
 
 % fprintf('最优解:\n');
 % disp(bestX);
 % fprintf('最小目标函数值: %.4f\n', bestFval);
+%% 
 
-disp(bestSolutions);
+figure;
+x = [];
+y = [];
+for i=1:numRuns
+    x = [x i];
+    y = [y bestSolutions{i}.MinObjective];
+    plot(x,y);
+end
 
+[resultmax,index] = min(y);
 
+fprintf('最优解:\n');
+disp(bestSolutions{index}.XAtMinObjective);
+fprintf('最小目标函数值: %.4f\n', resultmax);
+
+%% 
