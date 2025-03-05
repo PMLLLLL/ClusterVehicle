@@ -11,22 +11,18 @@ weights = [0.4, 0.2, 0.2, 0.2]; % 时间戳、位置、磁场值、车道号
 initDirection = [1 0 1];
 refreshDirWei = [0.5 0.5];
 scoreWei = [0.2 0.8];
+centerWei = [1 0.1];
 
 path = '../2025.3.3 85个数据汇总_标签.xlsx';
 
 % 数据加载与归一化
-%DataIn = readmatrix('../2025.2.25 大车数据合并_真实标签.xlsx'); % 2025.2.27 小车数据合并_真实标签.xlsx
-%DataIn = readmatrix('../2025.2.27 小车数据合并_真实标签.xlsx');% C26550、C26580真stream加磁场 .csv
+%DataIn = readmatrix('../2025.2.25 大车数据合并_真实标签.xlsx');
+%DataIn = readmatrix('../2025.2.27 小车数据合并_真实标签.xlsx');
 %DataIn = readmatrix('../C26550、C26580真stream加磁场 .csv');
 %DataIn = readmatrix('../2025.2.27 大车小车数据合并_真实标签.xlsx');
-%DataIn = readmatrix('../2025.3.3 85个数据汇总_标签.xlsx'); % 2025.3.4 11-20个数据汇总_标签.xlsx
-
-% DataIn = readmatrix('../2025.3.4 11-20个数据汇总_标签.xlsx');
-% DataIn = sortrows(DataIn, 3); % 按照第三列（位置Y）从小到大排序
-% NormalizedData = NormalizeData(DataIn);
+%DataIn = readmatrix('../2025.3.3 85个数据汇总_标签.xlsx');
 
 DataOper = DataProcessing(path);
-
 
 % 产生遍历权重
 % 选择哪个权重
@@ -38,11 +34,11 @@ for WeightNum = 1:4
     
     % 聚类处理
     for i = 1:count
-        CE = CEDAS(1.5393, decay,[0.21746    0.22789    0.96373    0.75239], ...
-            [0.70512            0.5611           0.65681], ...
-            [0.30789           0.81389], ...
-            [0.25726      0.13327], ...
-            [0.86614       0.88882]); % 用于存储聚类结果
+        CE = CEDAS(rad, decay,weights(i,:), ...
+            initDirection, ...
+            refreshDirWei, ...
+            scoreWei, ...
+            centerWei); % 用于存储聚类结果
 
         for t = 1:size(DataOper.normalizedData, 1)
             % 调用 CEDAS_demo3 算法
@@ -54,10 +50,10 @@ for WeightNum = 1:4
         DataOper = DataOper.GetContingencyMatrix();
 
         % 初始化显示类
-        show = Visualize(CE.clusters,DataOper.trueLabels,DataOper.clusterLabels,DataOper.contingencyMatrix);
-        show.ContingencyHeatMap1();
-        show.ContingencyHeatMap2();
-        show.ClustersImg;
+        % show = Visualize(CE.clusters,DataOper.trueLabels,DataOper.clusterLabels,DataOper.contingencyMatrix);
+        % show.ContingencyHeatMap1();
+        % show.ContingencyHeatMap2();
+        % show.ClustersImg;
         % 计算分类准确度RI
         RI(i) = RandIndex(DataOper.trueLabels,DataOper.clusterLabels);
     
