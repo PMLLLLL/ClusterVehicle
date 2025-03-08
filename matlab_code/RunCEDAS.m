@@ -34,7 +34,7 @@ for WeightNum = 1:4
     
     % 聚类处理
     for i = 1:count
-        CE = CEDAS(rad, decay,weights(i,:), ...
+        CE = CEDAS(1.5393, decay,weights(i,:), ...
             initDirection, ...
             refreshDirWei, ...
             scoreWei, ...
@@ -85,7 +85,7 @@ for WeightNum = 1:4
 end
 
 % 设置四个图的共同标题
-sgtitle(sprintf('大车小车一起 rad = %.2f direction=[ %s] RI变化趋势',rad,sprintf('%.f ', initDirection)));
+sgtitle(sprintf('多辆车一起 rad = %.2f direction=[ %s] RI变化趋势',rad,sprintf('%.f ', initDirection)));
 
 % profile off; % 关闭性能分析
 % profile viewer; % 显示分析结果
