@@ -11,11 +11,19 @@ classdef DataProcessing
     end
     
     methods
-        function obj = DataProcessing(datapath)
+        function obj = DataProcessing(datapath,trainIdx)
             %DATAPROCESSING 构造此类的实例
             %   读取数据并排序归一化
-            obj.dataIn = readmatrix(datapath);
-            obj = NormalizeData(obj);
+
+            if nargin > 1
+                obj.dataIn = readmatrix(datapath);
+                obj.dataIn = obj.dataIn(trainIdx,:);
+                obj = NormalizeData(obj);
+            end
+            if nargin == 1
+                obj.dataIn = readmatrix(datapath);
+                obj = NormalizeData(obj);
+            end
         end
 
         % 获取真实和聚类结果标签

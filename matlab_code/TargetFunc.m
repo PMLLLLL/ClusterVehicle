@@ -1,7 +1,6 @@
 function RI = TargetFunc(weight1,weight2,weight3,weight4,initDirection1,initDirection2,initDirection3, ...
-                        refreshDirWei1,refreshDirWei2,scoreWei1,scoreWei2,centerWei1,centerWei2,rad)
+                        refreshDirWei1,refreshDirWei2,scoreWei1,scoreWei2,centerWei1,centerWei2,rad,path,trainIdx)
 
-path = '../2025.3.3 85个数据汇总_标签.xlsx';
 % 参数设置
 decay = 0.000001; % 衰减因子
 
@@ -11,7 +10,7 @@ refreshDirWei = [refreshDirWei1,refreshDirWei2];
 scoreWei = [scoreWei1,scoreWei2];
 centerWei = [centerWei1,centerWei2];
 
-DataOper = DataProcessing(path);
+DataOper = DataProcessing(path,trainIdx);
 
 CE = CEDAS(rad, decay,weights, initDirection,refreshDirWei,scoreWei,centerWei); % 用于存储聚类结果
 

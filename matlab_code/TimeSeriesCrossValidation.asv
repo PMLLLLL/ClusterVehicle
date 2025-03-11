@@ -22,7 +22,7 @@ clear;
 
 % 获取数据
 
-path = '../2025.3.3 85个数据汇总_标签.xlsx';
+path = '../2025.2.27 大车小车数据合并_真实标签.xlsx';
 DataOper = DataProcessing(path);
 
 dataLength = length(DataOper.normalizedData(:,2));
@@ -38,24 +38,36 @@ maxFold = 3;
 % 存储每折的性能指标
 mse_values = zeros(maxFold,1);
 
-for fold = 1:maxFold
+for fold = 1:max_fold
     % 定义训练集索引
-    trainEnd = round(initialTrainSize + (fold-1)*intervalTrainSet);
+    trainEnd = initialTrainSize + (fold-1)*intervalTrainSet;
     trainIdx = 1:trainEnd;
     
     % 定义验证集索引 从训练集的后一位开始到最后
     testIdx = (trainEnd+1):dataLength;
-
     
-    % 训练模型
-    [trainRI,rad,weights,initDirection,refreshDirWei,scoreWei,centerWei] = ClusterAndBayeSopt(path,10,100,trainIdx);
-
-    % 用训练出来的参数对测试集验证
-    testRI = TestSetValid(path,rad,weights,initDirection,refreshDirWei,scoreWei,centerWei,testIdx);
+    % 提取训练集与验证集
+    trainSet = DataOper.NormalizeData(:,trainIdx);
+    testSet = DataOper.NormalizeData(:,);
+    
+    X_val = data(val_idx,:);
+    y_val = target(val_idx);
+    
+    % 训练模型（这里用线性回归为例）
+    model = fitlm(X_train, y_train);
+    
+    % 预测
+    y_pred = predict(model, X_val);
+    
+    % 计算本折性能指标 (例如均方误差MSE)
+    mse_values(fold) = mean((y_val - y_pred).^2);
     
     % 显示结果
-    fprintf('第%d次训练最佳RI=%.4f,测试RI=%.4f\n',fold,trainRI,testRI);
+    fprintf('Fold %d MSE: %.4f\n', fold, mse_values(fold));
 end
 
+% 显示所有折的平均性能
+mean_mse = mean(mse_values);
+fprintf('Average MSE across all folds: %.4f\n', mean_mse);
 
 
