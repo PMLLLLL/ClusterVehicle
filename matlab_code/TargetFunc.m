@@ -1,7 +1,7 @@
 function RI = TargetFunc(weight1,weight2,weight3,weight4,initDirection1,initDirection2,initDirection3, ...
                         refreshDirWei1,refreshDirWei2,scoreWei1,scoreWei2,centerWei1,centerWei2,rad)
 
-path = '../2025.2.27 大车小车数据合并_真实标签.xlsx';
+path = '../2025.3.3 85个数据汇总_标签.xlsx';
 % 参数设置
 decay = 0.000001; % 衰减因子
 
