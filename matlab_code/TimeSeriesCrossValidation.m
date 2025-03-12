@@ -30,12 +30,12 @@ dataLength = length(DataOper.normalizedData(:,2));
 disp(['数据长度:',num2str(dataLength)])
 
 initialTrainSize = dataLength*0.5; % 初始训练集大小
-intervalTrainSet = dataLength*0.1; % 每次训练集间隔大小
+intervalTrainSet = dataLength*0.01; % 每次训练集间隔大小
 
 % 循环几次验证
-maxFold = 3;
+maxFold = 12;
 
-% 存储每折的性能指标
+% 存储每次的性能指标
 mse_values = zeros(maxFold,1);
 
 for fold = 1:maxFold
@@ -48,14 +48,20 @@ for fold = 1:maxFold
 
     
     % 训练模型
-    [trainRI,rad,weights,initDirection,refreshDirWei,scoreWei,centerWei] = ClusterAndBayeSopt(path,10,100,trainIdx);
+    [trainRI,rad,weights,initDirection,refreshDirWei,scoreWei,centerWei] = ClusterAndBayeSopt(path,1,100,trainIdx);
 
     % 用训练出来的参数对测试集验证
     testRI = TestSetValid(path,rad,weights,initDirection,refreshDirWei,scoreWei,centerWei,testIdx);
     
     % 显示结果
-    fprintf('第%d次训练最佳RI=%.4f,测试RI=%.4f\n',fold,trainRI,testRI);
+    fprintf('第%d次训练最佳RI=%.4f,测试RI=%.4f 训练集:1:%d 测试集:%d:%d\n', ...
+                    fold,trainRI,testRI,trainEnd,trainEnd+1,dataLength);
+
+    mse_values(fold) = testRI;
 end
+
+plot(mse_values)
+title('每次测试集的准确率')
 
 
 
