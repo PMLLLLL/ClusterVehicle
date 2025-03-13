@@ -8,6 +8,12 @@ classdef DataProcessing
         trueLabels;% 聚类结果后的真实标签
         clusterLabels;% 聚类结果之后的预测标签
         contingencyMatrix;%混淆矩阵
+        dataLabeled;%结果数据汇总
+        dataToExcel;%结果数据汇总
+
+        % 归一化的参数
+        Mins;
+        Maxs;
     end
     
     methods
@@ -28,16 +34,33 @@ classdef DataProcessing
 
         % 获取真实和聚类结果标签
         function obj = GetLabel(obj,Clusters)
-            dataLabeled = [];
+            obj.trueLabels = [];
+            obj.clusterLabels = [];
+
+            for j = 1:length(Clusters)
+                % 数据第五列存储着真实标签
+                obj.trueLabels = [obj.trueLabels Clusters(j).Data(:,5)'];
+                % 第几个聚类代表分到第几个类别
+                obj.clusterLabels = [obj.clusterLabels repmat(j, 1, length(Clusters(j).Data(:,5)))];
+            end
+
+        end
+
+        % 将聚类结果输出到excel中
+        function Output2Excel(obj,filename,Clusters)
+            obj.dataLabeled = [];
 
             for j = 1:length(Clusters)
                 Clusters(j).Data(:,6) = j;
-                dataLabeled = [dataLabeled;Clusters(j).Data()];
+                Clusters(j).Data(:,7) =  Clusters(j).Data(:,1)*(obj.Maxs(1)-obj.Mins(1)) + obj.Mins(1);
+                Clusters(j).Data(:,8) =  Clusters(j).Data(:,2)+1;
+                Clusters(j).Data(:,9) =  Clusters(j).Data(:,3)*(obj.Maxs(3)-obj.Mins(3)) + obj.Mins(3);
+                Clusters(j).Data(:,10) =  Clusters(j).Data(:,4)*(obj.Maxs(4)-obj.Mins(4)) + obj.Mins(4);
+                obj.dataLabeled = [obj.dataLabeled;Clusters(j).Data()];
             end
 
-            % 提取真实分类的标签
-            obj.trueLabels = dataLabeled(:,5)';
-            obj.clusterLabels = dataLabeled(:,6)';
+            writematrix(obj.dataLabeled, filename); % 将矩阵写入 Excel 文件
+
         end
 
         % 计算混淆矩阵
@@ -67,8 +90,8 @@ classdef DataProcessing
             columns_to_process = [1, 3, 4];
         
             % 获取各列的最小值和最大值
-            Mins = min(DataMG(:, columns_to_process), [], 1);  % 获取指定列的最小值
-            Maxs = max(DataMG(:, columns_to_process), [], 1);  % 获取指定列的最大值
+            obj.Mins = min(DataMG(:, columns_to_process), [], 1);  % 获取指定列的最小值
+            obj.Maxs = max(DataMG(:, columns_to_process), [], 1);  % 获取指定列的最大值
         
             % 对指定列进行处理
             for idx = columns_to_process  % 对第1, 3, 4列进行归一化
@@ -80,12 +103,16 @@ classdef DataProcessing
                 end
                 
                 % 获取该列的最小值和最大值（忽略NaN）
-                Mins(idx) = min(DataMG(:, idx), [], 'omitnan');  % 忽略NaN值计算最小值
-                Maxs(idx) = max(DataMG(:, idx), [], 'omitnan');  % 忽略NaN值计算最大值
+                obj.Mins(idx) = min(DataMG(:, idx), [], 'omitnan');  % 忽略NaN值计算最小值
+                obj.Maxs(idx) = max(DataMG(:, idx), [], 'omitnan');  % 忽略NaN值计算最大值
+
+                if(idx == 4) 
+                    fprintf('最大值: %d, 最小值: %d\n', obj.Maxs(idx), obj.Mins(idx));
+                end
                 
                 % 如果最大值与最小值不相等，进行归一化
-                if Maxs(idx) > Mins(idx)
-                   DataMG(:, idx) = (DataMG(:, idx) - Mins(idx)) / (Maxs(idx) - Mins(idx));
+                if obj.Maxs(idx) > obj.Mins(idx)
+                   DataMG(:, idx) = (DataMG(:, idx) - obj.Mins(idx)) / (obj.Maxs(idx) - obj.Mins(idx));
                 else
                    % 如果最大值与最小值相等，将该列置为0（可以根据需求修改）
                    DataMG(:, idx) = zeros(size(DataMG, 1), 1);  % 全部设置为零

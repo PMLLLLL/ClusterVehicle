@@ -82,7 +82,10 @@ classdef CEDAS
             
             % 选择最佳簇或创建新簇
             if bestScore > 0.3
-                obj = obj.AssignToCluster(bestClusterIdx, sample);
+                % 如果最新的数据磁场值异常，取消分配
+                %if(abs(obj.clusters(bestClusterIdx).Data(end,4)-sample(4))<300)
+                    obj = obj.AssignToCluster(bestClusterIdx, sample);
+                %end
             else
                 obj = obj.InitNewCluster(sample);
             end

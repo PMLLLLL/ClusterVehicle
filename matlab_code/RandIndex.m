@@ -22,5 +22,5 @@ function RI = RandIndex(true_labels, cluster_labels)
     end
 
     % 计算 Rand Index
-    RI = (TP + TN) / (TP + TN + FP + FN);
+    RI = (TP + TN - FP) / (TP + TN + FP + FN);
 end

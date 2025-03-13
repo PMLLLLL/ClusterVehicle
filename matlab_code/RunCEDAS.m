@@ -7,13 +7,13 @@ rad = 3; % 聚类半径
 decay = 0.000001; % 衰减因子
 
 % 初始权重
-weights = [0.4, 0.2, 0.2, 0.2]; % 时间戳、位置、磁场值、车道号
+weights = [0.1, 0.1, 0.6, 0.2]; % 
 initDirection = [1 0 1];
 refreshDirWei = [0.5 0.5];
 scoreWei = [0.2 0.8];
 centerWei = [1 0.1];
 
-path = '../2025.2.27 大车小车数据合并_真实标签.xlsx';
+path = '../2025.3.3 85个数据汇总_标签.xlsx';
 
 % 数据加载与归一化
 %DataIn = readmatrix('../2025.2.25 大车数据合并_真实标签.xlsx');
@@ -40,11 +40,13 @@ for WeightNum = 1:4
         %     scoreWei, ...
         %     centerWei); % 用于存储聚类结果
 
-        CE = CEDAS(0.99009, decay,[0.32871    0.38669    0.031023    0.39699], ...
-            [0.18176           0.22614           0.38067], ...
-            [0.6013           0.37911], ...
-            [0.79158      0.88265], ...
-            [0.9822       0.18759]); % 用于存储聚类结果
+        CE = CEDAS(rad, ...
+            decay, ...
+            weights, ...
+            initDirection, ...
+            refreshDirWei, ...
+            scoreWei, ...
+            centerWei); % 用于存储聚类结果
 
         for t = 1:size(DataOper.normalizedData, 1)
             % 调用 CEDAS_demo3 算法
@@ -54,11 +56,12 @@ for WeightNum = 1:4
         % 计算真实标签和混淆矩阵
         DataOper = DataOper.GetLabel(CE.clusters);
         DataOper = DataOper.GetContingencyMatrix();
+        %DataOper.Output2Excel('out.xlsx',CE.clusters);
 
         % 初始化显示类
         show = Visualize(CE.clusters,DataOper.trueLabels,DataOper.clusterLabels,DataOper.contingencyMatrix);
-        show.ContingencyHeatMap1();
-        show.ContingencyHeatMap2();
+        %show.ContingencyHeatMap1();
+        %show.ContingencyHeatMap2();
         show.ClustersImg;
         % 计算分类准确度RI
         RI(i) = RandIndex(DataOper.trueLabels,DataOper.clusterLabels);
