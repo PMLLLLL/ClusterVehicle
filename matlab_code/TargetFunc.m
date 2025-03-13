@@ -10,7 +10,7 @@ refreshDirWei = [refreshDirWei1,refreshDirWei2];
 scoreWei = [scoreWei1,scoreWei2];
 centerWei = [centerWei1,centerWei2];
 
-DataOper = DataProcessing(path,trainIdx);
+DataOper = DataProcessing(path);
 
 CE = CEDAS(rad, decay,weights, initDirection,refreshDirWei,scoreWei,centerWei); % 用于存储聚类结果
 

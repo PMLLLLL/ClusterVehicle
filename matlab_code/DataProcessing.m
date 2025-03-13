@@ -105,10 +105,6 @@ classdef DataProcessing
                 % 获取该列的最小值和最大值（忽略NaN）
                 obj.Mins(idx) = min(DataMG(:, idx), [], 'omitnan');  % 忽略NaN值计算最小值
                 obj.Maxs(idx) = max(DataMG(:, idx), [], 'omitnan');  % 忽略NaN值计算最大值
-
-                if(idx == 4) 
-                    fprintf('最大值: %d, 最小值: %d\n', obj.Maxs(idx), obj.Mins(idx));
-                end
                 
                 % 如果最大值与最小值不相等，进行归一化
                 if obj.Maxs(idx) > obj.Mins(idx)

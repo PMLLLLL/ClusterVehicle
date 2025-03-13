@@ -8,7 +8,7 @@ from openpyxl import load_workbook
 # 4.输出到一个excel中
 
 # 读取 Excel 文件
-df = pd.read_excel("原始数据流.xlsx", sheet_name=0, engine='openpyxl')
+df = pd.read_excel("16换道截取kalmen.xlsx", sheet_name=0, engine='openpyxl')
 
 # 输出 DataFrame 形状
 print(f"DataFrame 共有 {df.shape[0]} 行 和 {df.shape[1]} 列")
@@ -26,7 +26,7 @@ for i in range(df.shape[0]):  # 0 到 82950
     cell_value = str(cell_value)  # 确保 cell_value 是字符串类型，处理 NaN 和非字符串类型
 
     # 使用 re（正则表达式，适用于复杂匹配）来检测str内容
-    pattern = r".*C\d{5}"  # 匹配C后面连续任意五个数字的字符串
+    pattern = r".*_\d{4}"  # 匹配C后面连续任意五个数字的字符串
     if re.match(pattern, cell_value):
         testCount = 0 # 计算检测到的数据个数
         for j in range(70):
@@ -36,7 +36,7 @@ for i in range(df.shape[0]):  # 0 到 82950
             # 执行到这里说明值不为空
             testCount += 1
 
-        if testCount >= 7:
+        if testCount >= 6:
             data = df.iloc[i:i+17]
             if dataSaveNum == 0:
                 newData = data

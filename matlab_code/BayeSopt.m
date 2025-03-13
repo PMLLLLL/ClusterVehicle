@@ -1,12 +1,12 @@
 clc; clear; close all;
 
-path = '../2025.3.3 85个数据汇总_标签.xlsx';
+path = '../2025.3.13 12.16换道整理.xlsx';
 
 % 定义目标函数
 objectiveFcn = @(X) TargetFunc(X.weight1, X.weight2, X.weight3, X.weight4, ...
                                X.initDirection1, X.initDirection2, X.initDirection3, ...
                                X.refreshDirWei1,X.refreshDirWei2,X.scoreWei1,X.scoreWei2, ...
-                               X.centerWei1,X.centerWei2,X.rad,path);
+                               X.centerWei1,X.centerWei2,X.rad,path,[]);
 
 % 定义多个优化变量 (搜索空间)
 vars = [
@@ -27,7 +27,7 @@ vars = [
 ];
 
 % 循环次数
-numRuns = 1;
+numRuns = 10;
 bestSolutions = cell(numRuns,1);
 
 
@@ -35,7 +35,7 @@ bestSolutions = cell(numRuns,1);
 for i=1:numRuns
     results = bayesopt(objectiveFcn, vars, ...
         'AcquisitionFunctionName', 'expected-improvement-plus', ...
-        'MaxObjectiveEvaluations', 1, ...
+        'MaxObjectiveEvaluations', 100, ...
         'Verbose', 1);
     
     % 显示最优解
