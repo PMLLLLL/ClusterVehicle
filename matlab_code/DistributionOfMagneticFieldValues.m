@@ -1,5 +1,7 @@
 clear;
 
+% 对磁场之的数据进行多种归一化处理查看结果
+
 path = '../2025.3.3 85个数据汇总_标签.xlsx';
 DataOper = DataProcessing(path);
 %MagneticValues = DataOper.normalizedData(:,4)';
