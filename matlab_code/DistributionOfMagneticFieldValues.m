@@ -7,8 +7,6 @@ DataOper = DataProcessing(path);
 %MagneticValues = DataOper.normalizedData(:,4)';
 
 % 将磁场数据按值切分
-
-
 MagneticValues = DataOper.dataIn(:,4)';
 MagneticValues = sort(MagneticValues); %#ok<TRSRT>
 

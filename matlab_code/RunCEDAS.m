@@ -68,12 +68,6 @@ DataOper = DataProcessing(path);
 
 % 聚类处理
 
-% CE = CEDAS(1.5393, decay,weights(i,:), ...
-%     initDirection, ...
-%     refreshDirWei, ...
-%     scoreWei, ...
-%     centerWei); % 用于存储聚类结果
-
 CE = CEDAS(rad, ...
     decay, ...
     weights, ...
@@ -82,29 +76,28 @@ CE = CEDAS(rad, ...
     scoreWei, ...
     centerWei); % 用于存储聚类结果
 
+fid = fopen('debug_log.txt', 'w'); % 打开或创建文件用于写入
 for t = 1:size(DataOper.normalizedData, 1)
+    fprintf(fid, '第%d个数据: ',t); % 写入日志文件
     % 调用 CEDAS_demo3 算法
-    CE = CE.Clustering(DataOper.normalizedData(t,:));
+    CE = CE.Clustering(DataOper.normalizedData(t,:),fid);
 end
-
+fclose(fid); % 关闭文件
 % 计算真实标签和混淆矩阵
-DataOper = DataOper.GetLabel(CE.clusters);
-DataOper = DataOper.GetContingencyMatrix();
+% DataOper = DataOper.GetLabel(CE.clusters);
+% DataOper = DataOper.GetContingencyMatrix();
 %DataOper.Output2Excel('out.xlsx',CE.clusters);
 
 % 初始化显示类
-show = Visualize(CE.clusters,DataOper.trueLabels,DataOper.clusterLabels,DataOper.contingencyMatrix);
+%show = Visualize(CE.clusters,DataOper.trueLabels,DataOper.clusterLabels,DataOper.contingencyMatrix);
 %show.ContingencyHeatMap1();
 %show.ContingencyHeatMap2();
-show.ClustersImg;
+%show.ClustersImg;
 % 计算分类准确度RI
-RI = RandIndex(DataOper.trueLabels,DataOper.clusterLabels);
+%RI = RandIndex(DataOper.trueLabels,DataOper.clusterLabels);
 
-fprintf('聚类结果的数量: %d 权重Weights = [ %s] RI = %s \n',...
-        length(CE.clusters),sprintf('%.2f ', weights),sprintf('%.4f ', RI));
-
-
-
+% fprintf('聚类结果的数量: %d 权重Weights = [ %s] RI = %s \n',...
+%         length(CE.clusters),sprintf('%.2f ', weights),sprintf('%.4f ', RI));
 
 
 % profile off; % 关闭性能分析
