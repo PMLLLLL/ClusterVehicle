@@ -20,15 +20,12 @@ histogram(MagneticValues)
 title("原始磁场数据直方图");
 
 % 直接归一化处理原始磁场数据
-MagneticValuesNormail = Normal(MagneticValues);
-figure;
-stem(MagneticValuesNormail,'.');
-title("原始磁场数据归一化");
+MagneticValuesNormail = 
 
 
 %%
 % 对数处理
-logMagneticValues = log(MagneticValues);
+logMagneticValues = log(MagneticValues-50);
 logMagneticValues = Normal(logMagneticValues);
 
 figure;
@@ -40,8 +37,8 @@ title("对数处理磁场数据直方图");
 
 
 %%
-Storey1 = [1000 5000];
-Storey2 = [375 1000];
+Storey1 = [2000 5000];
+Storey2 = [375 2000];
 Storey3 = [0 375];
 
 Storey1Values = MagneticValues(MagneticValues>=Storey1(1) & MagneticValues<Storey1(2));
