@@ -4,11 +4,11 @@ clear;
 
 path = '../2025.3.3 85个数据汇总_标签.xlsx';
 DataOper = DataProcessing(path);
-MagneticValues = DataOper.normalizedData(:,4)';
+% MagneticValues = DataOper.normalizedData(:,4)';
 
 % 将磁场数据按值切分
-% MagneticValues = DataOper.dataIn(:,4)';
-% MagneticValues = sort(MagneticValues); %#ok<TRSRT>
+MagneticValues = DataOper.dataIn(:,4)';
+MagneticValues = sort(MagneticValues); %#ok<TRSRT>
 
 figure;
 stem(MagneticValues,'.');
@@ -102,15 +102,13 @@ histogram(StoreyValuesNormalAll1);
 title("分层处理1磁场数据直方图（向量化方法）");
 
 function results = HierarchicalNormalization(data,Hierarchical)
-    results = zeros(size(data));
-    t = length(Hierarchical(:,1));
-    for i = 1:t
+    for i = 1:length(Hierarchical(1,:))
         % 分层逻辑索引
         mask = (data >= Hierarchical(i,1)) & (data < Hierarchical(i,2));
-        results(mask) =3-i + (data(mask) - Hierarchical(i,1)) / (Hierarchical(i,2) - Hierarchical(i,1));
+        data(mask) = i-1+(data(mask) - Hierarchical(i,1)) / (Hierarchical(i,2) - Hierarchical(i,1));
     end
     
-    results = (results - min(results))/(max(results) - min(results));
+    results = (data - min(data))/(max(data) - min(data));
 end
 
 function results = Normal(data,min,max)
