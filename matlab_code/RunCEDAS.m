@@ -79,22 +79,22 @@ decay = 0.000001; % 衰减因子
 % centerWei = [0.96617       0.44282];
 
 % 经过磁场分层归一化后优化16(去除一点其他不相关车辆)的值 0.9110
-rad = 2.1502;
-weights = [0.41993    0.40206    0.31575    0.50162]; 
-initDirection = [0.94102           0.81151           0.021649];
-refreshDirWei = [ 0.0867           0.75983];
-scoreWei = [0.43352      0.49883];
-centerWei = [0.14729       0.56884];
+% rad = 2.1502;
+% weights = [0.41993    0.40206    0.31575    0.50162]; 
+% initDirection = [0.94102           0.81151           0.021649];
+% refreshDirWei = [ 0.0867           0.75983];
+% scoreWei = [0.43352      0.49883];
+% centerWei = [0.14729       0.56884];
 
 % 多辆车分层归一化后优化的值 0.9924
-% rad = 0.41974;
-% weights = [0.38865    0.52207    0.27358    0.46901]; 
-% initDirection = [0.28821           0.84255           0.58017];
-% refreshDirWei = [0.50008           0.67771];
-% scoreWei = [0.7802       0.35717];
-% centerWei = [0.97093       0.11883];
+rad = 0.41974;
+weights = [0.38865    0.52207    0.27358    0.46901]; 
+initDirection = [0.28821           0.84255           0.58017];
+refreshDirWei = [0.50008           0.67771];
+scoreWei = [0.7802       0.35717];
+centerWei = [0.97093       0.11883];
 
-path = '../2025.3.13 12.16换道整理.xlsx';
+path = '../2025.3.26 12.16原始数据.xlsx';
 
 % 数据加载与归一化
 %DataIn = readmatrix('../2025.2.25 大车数据合并_真实标签.xlsx');
@@ -111,7 +111,7 @@ DataOper = DataProcessing(path);
 
 % 聚类处理
 
-CE = CEDAS(rad, ...
+CE = CEDASS(rad, ...
     decay, ...
     weights, ...
     initDirection, ...
