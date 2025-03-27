@@ -1,5 +1,5 @@
-function RI = TargetFunc(weight1,weight2,weight3,weight4,initDirection1,initDirection2,initDirection3, ...
-                        refreshDirWei1,refreshDirWei2,scoreWei1,scoreWei2,centerWei1,centerWei2,rad,path,trainIdx)
+function RI = TargetFunc2(weight1,weight2,weight3,weight4,initDirection1,initDirection2,initDirection3, ...
+                        refreshDirWei1,refreshDirWei2,scoreWei1,scoreWei2,centerWei1,rad,path,trainIdx)
 
 % 参数设置
 decay = 0.000001; % 衰减因子
@@ -8,7 +8,7 @@ weights = [weight1,weight2,weight3,weight4];
 initDirection = [initDirection1,initDirection2,initDirection3];
 refreshDirWei = [refreshDirWei1,refreshDirWei2];
 scoreWei = [scoreWei1,scoreWei2];
-centerWei = [centerWei1,centerWei2];
+centerWei = [centerWei1,1];
 
 DataOper = DataProcessing(path);
 

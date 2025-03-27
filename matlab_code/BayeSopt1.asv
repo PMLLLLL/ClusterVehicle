@@ -3,10 +3,10 @@ clc; clear; close all;
 path = '../2025.3.21 12.16换道整理 - 减少其他干扰值.xlsx';
 
 % 定义目标函数
-objectiveFcn = @(X) TargetFunc(X.weight1, X.weight2, X.weight3, X.weight4, ...
+objectiveFcn = @(X) TargetFunc1(X.weight1, X.weight2, X.weight3, X.weight4, ...
                                X.initDirection1, X.initDirection2, X.initDirection3, ...
                                X.refreshDirWei1,X.refreshDirWei2,X.scoreWei1,X.scoreWei2, ...
-                               X.centerWei1,X.centerWei2,X.rad,path,[]);
+                               X.rad,path,[]);
 
 % 定义多个优化变量 (搜索空间)
 vars = [
@@ -21,8 +21,6 @@ vars = [
     optimizableVariable('refreshDirWei2', [0, 1], 'Type', 'real')
     optimizableVariable('scoreWei1', [0, 1], 'Type', 'real')
     optimizableVariable('scoreWei2', [0, 1], 'Type', 'real')
-    optimizableVariable('centerWei1', [0, 2], 'Type', 'real')
-    optimizableVariable('centerWei2', [0, 1], 'Type', 'real')
     optimizableVariable('rad', [0, 15], 'Type', 'real')
 ];
 
