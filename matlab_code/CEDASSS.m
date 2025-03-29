@@ -1,4 +1,4 @@
-classdef CEDASS
+classdef CEDASSS
     % 修改余弦相似度计算
     properties(Access = public)
         clusters;
@@ -12,7 +12,7 @@ classdef CEDASS
     end
 
     methods(Access = public)
-        function obj = CEDASS(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerwei)
+        function obj = CEDASSS(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerwei)
            % 新建类，将簇初始化 初始长度为0
            obj.clusters = struct('Data', {}, 'Centre', {}, 'Life', {}, 'Direction', {});
            obj.rad = rad;
@@ -24,10 +24,11 @@ classdef CEDASS
            obj.centerWei = centerwei;
         end
 
-        function obj = Clustering(obj,sample)
+        function obj = Clustering(obj,sample,logtext)
             % 如果是没有簇，则创建一个新簇
             if(isempty(obj.clusters)) 
                 obj = obj.InitNewCluster(sample);
+                % fprintf(logtext, '没有数据 建立第一个簇\n'); % 写入日志文件
                 return;
             end
 
@@ -37,18 +38,15 @@ classdef CEDASS
             validClusters = false(1, numClusters); % 预分配逻辑索引数组
  
             % 遍历所有簇
+            % fprintf(logtext, '此时簇的个数为%d个,对簇距离进行遍历: ',numClusters); % 写入日志文件
             for i = 1:numClusters
-                if max(obj.clusters(i).Data(:, 1)) ~= sample(1) % % 取簇的第一列数据筛选符合条件的簇
-                    % 计算距离
-                    if(length(obj.clusters(i).Data(:,2))>=2)
-                        oA = obj.clusters(i).Data(end-1,1:3);
-                        oB = obj.clusters(i).Data(end-1,1:3);
-                        n = obj.clusters(i).Data(end,1)-obj.clusters(i).Data(end-1,1);
-                        distances(i) = sqrt(sum((obj.weights(1:3) .* (sample(1:3) - (n+1)*oB-oA)/n)));
-                    else
-                        distances(i) = sqrt(sum((obj.weights(1:3) .* (sample(1:3) - obj.clusters(i).Data(end,1:3))).^2));
-                    end
+                if max(obj.clusters(i).Data(:, 1)) < sample(1) % % 取簇的第一列数据筛选符合条件的簇
+                    % 计算加权欧几里得距离
+                    distances(i) = sqrt(sum((obj.weights(1:4) .* (sample(1:4) - obj.clusters(i).Centre(1:4))).^2));
+                    % fprintf(logtext, '与第%d个簇的距离为%.2f ',i,distances(i)); % 写入日志文件每次计算簇的距离
                     validClusters(i) = distances(i) < obj.rad; % 记录满足距离条件的簇
+                else
+                    % fprintf(logtext, '第%d个簇第一列数据不满足要求 ',i); % 写入日志文件每次计算簇的距离
                 end
         
             end
@@ -72,7 +70,7 @@ classdef CEDASS
             % fprintf(logtext, '对聚类半径之内的簇计算收益 '); % 写入日志文件每次计算簇的距离
             for i = validClusters
                 % 计算方向性匹配度
-                direction_vector = sampleDirection - obj.clusters(i).Centre(1:3);
+                direction_vector = (sampleDirection - obj.clusters(i).Data(-1,1:3))/2;
                 dirNorm = norm(direction_vector);
                 
                 CosSim = dot(direction_vector, obj.clusters(i).Direction) / (dirNorm * norm(obj.clusters(i).Direction));
@@ -135,9 +133,9 @@ classdef CEDASS
             % 更新簇中心
             % direction = (newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3)) / obj.rad;
             % obj.clusters(clusterIndex).Centre(1:3) = obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei(2) * newSample(1:3); %增加新加入的权重
-            obj.clusters(clusterIndex).Centre(1:3) = (obj.clusters(clusterIndex).Centre(1:3) + newSample(1:3))/2; %增加新加入的权重
+            % obj.clusters(clusterIndex).Centre(1:3) = (obj.clusters(clusterIndex).Centre(1:3) + newSample(1:3))/2; %增加新加入的权重
 
-            % obj.clusters(clusterIndex).Centre(1:3) = (1+obj.centerWei(1)) * newSample(1:3) - obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3); %增加新加入的权重
+            obj.clusters(clusterIndex).Centre(1:3) = (1+obj.centerWei(1)) * newSample(1:3) - obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3); %增加新加入的权重
 
             % 更新磁场值
             obj.clusters(clusterIndex).Centre(4) = mean([obj.clusters(clusterIndex).Centre(4) newSample(4)]);
@@ -149,14 +147,9 @@ classdef CEDASS
         % 更新簇的方向性
         function obj = UpdateClusterDirection(obj, clusterIndex,newSample)
             % 使用当前簇方向和新样本的方向加权更新
-            if(length(obj.clusters(clusterIndex).Data(:,1)) == 1)
-                newDirection = newSample(1:3) - obj.clusters(clusterIndex).Data(1,1:3);
-            else
-                direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
-                newDirection = obj.refreshDirWei(1) * obj.clusters(clusterIndex).Direction + obj.refreshDirWei(2) * (direction / norm(direction));
-            end
+            direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
+            newDirection = obj.refreshDirWei(1) * obj.clusters(clusterIndex).Direction + obj.refreshDirWei(2) * (direction / norm(direction));
             obj.clusters(clusterIndex).Direction = newDirection / norm(newDirection); % 归一化
-            
         end
     end
 end

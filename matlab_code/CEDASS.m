@@ -24,11 +24,10 @@ classdef CEDASS
            obj.centerWei = centerwei;
         end
 
-        function obj = Clustering(obj,sample,logtext)
+        function obj = Clustering(obj,sample)
             % 如果是没有簇，则创建一个新簇
             if(isempty(obj.clusters)) 
                 obj = obj.InitNewCluster(sample);
-                % fprintf(logtext, '没有数据 建立第一个簇\n'); % 写入日志文件
                 return;
             end
 
@@ -38,17 +37,19 @@ classdef CEDASS
             validClusters = false(1, numClusters); % 预分配逻辑索引数组
  
             % 遍历所有簇
-            % fprintf(logtext, '此时簇的个数为%d个,对簇距离进行遍历: ',numClusters); % 写入日志文件
             for i = 1:numClusters
-                if max(obj.clusters(i).Data(:, 1)) < sample(1) % % 取簇的第一列数据筛选符合条件的簇
-                    % 计算加权欧几里得距离
-                    distances(i) = sqrt(sum((obj.weights(1:4) .* (sample(1:4) - obj.clusters(i).Centre(1:4))).^2));
-                    % fprintf(logtext, '与第%d个簇的距离为%.2f ',i,distances(i)); % 写入日志文件每次计算簇的距离
+                if max(obj.clusters(i).Data(:, 1)) ~= sample(1) % % 取簇的第一列数据筛选符合条件的簇
+                    % 计算距离
+                    if(length(obj.clusters(i).Data(:,2))>=2)
+                        oA = obj.clusters(i).Data(end-1,1:3);
+                        oB = obj.clusters(i).Data(end-1,1:3);
+                        n = obj.clusters(i).Data(end,1)-obj.clusters(i).Data(end-1,1);
+                        distances(i) = sqrt(sum((obj.weights(1:3) .* (sample(1:3) - (n+1)*oB-oA)/n)));
+                    else
+                        distances(i) = sqrt(sum((obj.weights(1:3) .* (sample(1:3) - obj.clusters(i).Data(end,1:3))).^2));
+                    end
                     validClusters(i) = distances(i) < obj.rad; % 记录满足距离条件的簇
-                else
-                    % fprintf(logtext, '第%d个簇第一列数据不满足要求 ',i); % 写入日志文件每次计算簇的距离
                 end
-        
             end
             
             % 提取有效簇索引
@@ -57,8 +58,7 @@ classdef CEDASS
             % 如果没有满足条件的簇，则创建新簇
             if isempty(validClusters)
                 obj = obj.InitNewCluster(sample);
-                % fprintf(logtext, '与所有簇的距离都大于聚类半径，创建新簇/n'); % 写入日志文件每次计算簇的距离
-                return;
+               return;
             end
             
             % 根据方向性和距离计算收益，并选择最佳匹配簇
@@ -67,7 +67,9 @@ classdef CEDASS
             
             sampleDirection = sample(1:3); % 仅取前三维用于方向计算
             
-            % fprintf(logtext, '对聚类半径之内的簇计算收益 '); % 写入日志文件每次计算簇的距离
+            % 计算距离最大的一个值用于归一化
+            distancesMax = max(distances);
+
             for i = validClusters
                 % 计算方向性匹配度
                 direction_vector = sampleDirection - obj.clusters(i).Centre(1:3);
@@ -76,13 +78,10 @@ classdef CEDASS
                 CosSim = dot(direction_vector, obj.clusters(i).Direction) / (dirNorm * norm(obj.clusters(i).Direction));
                 
                 % 归一化距离
-                NormDist = distances(i) / obj.rad;
-
-                % fprintf(logtext, '第%d个簇方向为%.2f ',i,CosSim);
+                NormDist = distances(i) / distancesMax;
                 
                 % 计算收益
                 score = obj.scoreWei(1) * (1 - NormDist) + obj.scoreWei(2) * CosSim;
-                % fprintf(logtext, '计算得到的收益为%.2f',score); % 写入日志文件每次计算簇的距离
                 % 更新最佳簇索引
                 if score > bestScore
                     bestScore = score;
@@ -90,8 +89,11 @@ classdef CEDASS
                 end
             end
             
+            % if(bestClusterIdx ~= -1)
+            %     obj = obj.AssignToCluster(bestClusterIdx, sample);
+            % end
             % 选择最佳簇或创建新簇
-            if bestScore > 0.3
+            if bestScore > 0.1
                 obj = obj.AssignToCluster(bestClusterIdx, sample);
                 % fprintf(logtext, '收益最佳的簇为第%d个,且得分为%.2f,将数据加入到第%d个簇',bestClusterIdx,bestScore,bestClusterIdx); % 写入日志文件每次计算簇的距离
             else
@@ -99,10 +101,6 @@ classdef CEDASS
                 % fprintf(logtext, '所有得分没有超过0.3,形成新簇'); % 写入日志文件每次计算簇的距离
             end
             
-            % % 衰减簇生命值并移除失效簇
-            % obj.clusters(:).Life = [obj.clusters(:).Life] - obj.decay;
-            % index = find([obj.clusters(:).Life] <= 0);
-            % obj.clusters(index) = [];
 
             % 衰减簇生命值
             for i = 1:length(obj.clusters) % 倒序遍历以便移除
@@ -112,7 +110,6 @@ classdef CEDASS
             % 移除失效簇
             index = find([obj.clusters(:).Life] <= 0);
             obj.clusters(index) = [];
-            % fprintf(logtext, '\n'); % 写入日志文件
         end
 
         % 初始化新簇
@@ -147,9 +144,14 @@ classdef CEDASS
         % 更新簇的方向性
         function obj = UpdateClusterDirection(obj, clusterIndex,newSample)
             % 使用当前簇方向和新样本的方向加权更新
-            direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
-            newDirection = obj.refreshDirWei(1) * obj.clusters(clusterIndex).Direction + obj.refreshDirWei(2) * (direction / norm(direction));
+            if(length(obj.clusters(clusterIndex).Data(:,1)) == 1)
+                newDirection = newSample(1:3) - obj.clusters(clusterIndex).Data(1,1:3);
+            else
+                direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
+                newDirection = obj.refreshDirWei(1) * obj.clusters(clusterIndex).Direction + obj.refreshDirWei(2) * (direction / norm(direction));
+            end
             obj.clusters(clusterIndex).Direction = newDirection / norm(newDirection); % 归一化
+            
         end
     end
 end

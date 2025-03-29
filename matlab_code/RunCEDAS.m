@@ -87,12 +87,12 @@ decay = 0.000001; % 衰减因子
 % centerWei = [1.2217       0.68084];
 
 % 经过磁场分层归一化后(修改聚类中心计算1结果)优化16(去除一点其他不相关车辆)的值 0.8268 不能聚类出换道 但是结果中不是换道车辆没有被干扰很多
-rad = 0.60344;
-weights = [0.42313    0.78613    0.25564    0.37519]; 
-initDirection = [0.95774           0.076758          0.087588];
-refreshDirWei = [0.21223           0.01466];
-scoreWei = [0.97089      0.66766];
-centerWei = [1     1];
+% rad = 0.60344;
+% weights = [0.42313    0.78613    0.25564    0.37519]; 
+% initDirection = [0.95774           0.076758          0.087588];
+% refreshDirWei = [0.21223           0.01466];
+% scoreWei = [0.97089      0.66766];
+% centerWei = [1     1];
 
 % 经过磁场分层归一化后(修改聚类中心计算2结果)优化16(去除一点其他不相关车辆)的值 1 3/10
 % rad = 9.7269;
@@ -104,15 +104,41 @@ centerWei = [1     1];
 
 % 多辆车分层归一化后优化的值 0.9924
 % rad = 0.41974;
-% weights = [0.38865    0.52207    0.27358    0.46901]; 
+% % weights = [0.38865    0.52207    0.27358    0.46901]; 
+% weights = [0.34965    0.35665    0.39604    0.35799]; 
 % initDirection = [0.28821           0.84255           0.58017];
 % refreshDirWei = [0.50008           0.67771];
-% scoreWei = [0.7802       0.35717];
-% centerWei = [0.97093       0.11883];
+% scoreWei = [0.7802 0.35717];
+% % centerWei = [0.97093       0.11883];
+% centerWei = [1       0.11883];
+
+% 多辆车分层归一化后优化距离计算和方向计算优化的值 0.99402
+% rad = 0.35682;
+% weights = [0.39781    0.88412    0.30307    0.36923]; 
+% initDirection = [0.57776           0.83494           0.54061];
+% refreshDirWei = [0.10241            0.8558];
+% scoreWei = [0.010156      6.6696];
+% centerWei = [1.9801       0.11883];
+
+% % 多辆车分层归一化后优化距离计算和方向计算优化2的值 0.99402
+% rad = 6.6142;
+% weights = [0.35648    0.41781    0.32681    0.48458]; 
+% initDirection = [0.89128          0.00093824          0.9159];
+% refreshDirWei = [0.023741          0.55626];
+% scoreWei = [0.083191      0.96666];
+% centerWei = [1.9801       0.11883];
+
+% 多辆车分层归一化后优化距离计算和方向计算优化3的值 0.9928
+rad = 1.5212;
+weights = [0.34137    0.5877     0.14721    0.47047]; 
+initDirection = [0.16302           0.64315           0.017231];
+refreshDirWei = [0.14839           0.96115 ];
+scoreWei = [0     1.7603];
+centerWei = [1.9801       0.11883];
 
 
 
-path = '../2025.3.21 12.16换道整理 - 减少其他干扰值.xlsx';
+path = '../2025.3.3 85个数据汇总_标签.xlsx';
 
 % 数据加载与归一化
 %DataIn = readmatrix('../2025.2.25 大车数据合并_真实标签.xlsx');
@@ -123,9 +149,9 @@ path = '../2025.3.21 12.16换道整理 - 减少其他干扰值.xlsx';
 %DataIn = readmatrix('../2025.3.13 12.15换道整理.xlsx');
 %DataIn = readmatrix('../2025.3.13 12.16换道整理.xlsx');
 %DataIn = readmatrix('../2025.3.21 12.16换道整理 - 减少其他干扰值.xlsx');
+%DataIn = readmatrix('../2025.3.26 12.16原始数据(除去磁场方向unknow的值).xlsx');
 
 DataOper = DataProcessing(path);
-
 
 % 聚类处理
 
@@ -139,11 +165,9 @@ CE = CEDASS(rad, ...
 
 fid = fopen('debug_log.txt', 'w'); % 打开或创建文件用于写入
 for t = 1:size(DataOper.normalizedData, 1)
-    fprintf(fid, '第%d个数据: ',t); % 写入日志文件
     % 调用 CEDAS_demo3 算法
-    CE = CE.Clustering(DataOper.normalizedData(t,:),fid);
+    CE = CE.Clustering(DataOper.normalizedData(t,:));
 end
-fclose(fid); % 关闭文件
 % 计算真实标签和混淆矩阵
 DataOper = DataOper.GetLabel(CE.clusters);
 % DataOper = DataOper.GetContingencyMatrix();

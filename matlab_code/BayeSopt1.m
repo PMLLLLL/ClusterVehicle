@@ -1,6 +1,6 @@
 clc; clear; close all;
 
-path = '../2025.3.21 12.16换道整理 - 减少其他干扰值.xlsx';
+path = '../2025.3.3 85个数据汇总_标签.xlsx';
 
 % 定义目标函数
 objectiveFcn = @(X) TargetFunc1(X.weight1, X.weight2, X.weight3, X.weight4, ...
@@ -19,8 +19,8 @@ vars = [
     optimizableVariable('initDirection3', [0, 1], 'Type', 'real')
     optimizableVariable('refreshDirWei1', [0, 1], 'Type', 'real')
     optimizableVariable('refreshDirWei2', [0, 1], 'Type', 'real')
-    optimizableVariable('scoreWei1', [0, 1], 'Type', 'real')
-    optimizableVariable('scoreWei2', [0, 1], 'Type', 'real')
+    optimizableVariable('scoreWei1', [0, 6], 'Type', 'real')
+    optimizableVariable('scoreWei2', [0, 6], 'Type', 'real')
     optimizableVariable('rad', [0, 15], 'Type', 'real')
 ];
 
