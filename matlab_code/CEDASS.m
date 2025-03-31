@@ -43,8 +43,10 @@ classdef CEDASS
                     if(length(obj.clusters(i).Data(:,2))>=2)
                         oA = obj.clusters(i).Data(end-1,1:3);
                         oB = obj.clusters(i).Data(end-1,1:3);
-                        n = obj.clusters(i).Data(end,1)-obj.clusters(i).Data(end-1,1);
-                        distances(i) = sqrt(sum((obj.weights(1:3) .* (sample(1:3) - (n+1)*oB-oA)/n)));
+                        oC = sample(1:3);
+                        n1 = oB(1)-oA(1);
+                        n2 = oC(1)-oB(1);
+                        distances(i) = sqrt(sum((obj.weights(1:3) .* (oC - (oB-oA)/n1*n2+oB))));
                     else
                         distances(i) = sqrt(sum((obj.weights(1:3) .* (sample(1:3) - obj.clusters(i).Data(end,1:3))).^2));
                     end
