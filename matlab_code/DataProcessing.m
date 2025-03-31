@@ -43,7 +43,6 @@ classdef DataProcessing
                 % 第几个聚类代表分到第几个类别
                 obj.clusterLabels = [obj.clusterLabels repmat(j, 1, length(Clusters(j).Data(:,5)))];
             end
-
         end
 
         % 将聚类结果输出到excel中

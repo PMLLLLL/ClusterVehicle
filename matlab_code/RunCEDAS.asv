@@ -201,6 +201,7 @@ bigvehicletrueLables = bigvehicleDataTable(:,5);
 bigvehicleclusterLables = bigvehicleDataTable(:,7);
 %% 分别计算总体 大车 小车的RI JC FMI
 
+% 计算分类准确度RI
 [RI,JC,FMI]=GetRI_JC_FMI(trueLables,clusterLables);
 [littleRI,littleJC,littleFMI]=GetRI_JC_FMI(littlevehicletrueLables,littlevehicleclusterLables);
 [bigRI,bigJC,bigFMI]=GetRI_JC_FMI(bigvehicletrueLables,bigvehicleclusterLables);
