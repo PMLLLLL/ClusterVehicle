@@ -83,12 +83,38 @@ classdef DataProcessing
         function obj = NormalizeData(obj)
             DataMG = sortrows(obj.dataIn, 3); % 按照第三列（位置Y）从小到大排序
 
-            % 要处理的列 1 2 3列使用最大最小值归一化
+            % 要处理的列 1 3列使用最大最小值归一化
             columns_to_process = [1,2,3];
-
-            for idx = columns_to_process
-                DataMG(:,idx) = MaxMinNormalization(DataMG(:,idx),min(DataMG(:,idx)),max(DataMG(:,idx)));
+        
+            % 对指定列进行处理
+            for idx = columns_to_process  % 对第1 2 3列进行归一化
+                % 排除NaN值
+                if any(isnan(DataMG(:, idx)))
+                   warning('Data contains NaN values in column %d, replacing with column mean.', idx);
+                   % 用该列的均值替代NaN值
+                  DataMG(:, idx) = fillmissing(DataMG(:, idx), 'constant', nanmean(DataMG(:, idx)));
+                end
+                
+                % 获取该列的最小值和最大值（忽略NaN）
+                obj.Mins(idx) = min(DataMG(:, idx), [], 'omitnan');  % 忽略NaN值计算最小值
+                obj.Maxs(idx) = max(DataMG(:, idx), [], 'omitnan');  % 忽略NaN值计算最大值
+                
+                % 如果最大值与最小值不相等，进行归一化
+                if obj.Maxs(idx) > obj.Mins(idx)
+                   DataMG(:, idx) = (DataMG(:, idx) - obj.Mins(idx)) / (obj.Maxs(idx) - obj.Mins(idx));
+                else
+                   % 如果最大值与最小值相等，将该列置为0（可以根据需求修改）
+                   DataMG(:, idx) = zeros(size(DataMG, 1), 1);  % 全部设置为零
+                   disp(['Column ' num2str(idx) ' has constant values, setting to zero.']);
+                end
             end
+            % 第二列是离散值，间隔为4m，需要通过缩放因子来调整其权重
+            discreteData = DataMG(:, 2);  % 获取第二列数据
+            % 归一化第二列数据，假设其值在0和1之间
+            discreteDataNormalized = (discreteData - min(discreteData)) / (max(discreteData) - min(discreteData));
+
+            % 将处理后的第二列数据重新放回
+            DataMG(:, 2) = discreteDataNormalized;
 
             % % 第四列磁场使用分层归一化
             % DataMG(:, 4) = HierarchicalNormalization(DataMG(:, 4));
