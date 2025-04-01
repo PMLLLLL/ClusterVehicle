@@ -130,11 +130,8 @@ classdef CEDAS
             % 记录簇的历史数据
             newCluster.allCentre = newSample;
             newCluster.allDirection = obj.initDirection / sqrt(3);
-            if isempty(obj.clusters)
-                obj.clusters = newCluster;
-            else
-                obj.clusters = [obj.clusters, newCluster];
-            end
+
+            obj.clusters = [obj.clusters, newCluster];
         end
 
         % 将新数据分配到现有簇

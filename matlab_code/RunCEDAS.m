@@ -171,7 +171,6 @@ CE = CEDAS(rad, ...
     scoreWei, ...
     centerWei); % 用于存储聚类结果
 
-fid = fopen('debug_log.txt', 'w'); % 打开或创建文件用于写入
 for t = 1:size(DataOper.normalizedData, 1)
     % 调用 CEDAS_demo3 算法
     CE = CE.Clustering(DataOper.normalizedData(t,:));
