@@ -10,10 +10,6 @@ classdef DataProcessing
         contingencyMatrix;%混淆矩阵
         dataLabeled;%结果数据汇总
         dataToExcel;%结果数据汇总
-
-        % 归一化的参数
-        Mins;
-        Maxs;
     end
     
     methods

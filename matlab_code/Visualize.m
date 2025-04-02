@@ -23,23 +23,14 @@ classdef Visualize
             figure;
             hold on;
             grid on;
-            view(3); % 设置三维视图
+            view([-75.8182 5.3748]); % 设置三维视图
+            
+            numClusters = size(obj.Clusters,2);  % 获取簇数量
         
-            % 获取所有簇的中心
-            allCentres = arrayfun(@(c) c.Centre, obj.Clusters, 'UniformOutput', false);  % 返回所有簇中心
-            numClusters = size(allCentres, 2);  % 获取簇数量
-        
-            % 定义颜色表
-            Clrs = lines(numClusters); % 使用默认的线条颜色方案
         
             % 绘制每个簇
             for idx2 = 1:numClusters
-            % 获取当前簇的中心
-            clusterCentre = obj.Clusters(idx2).Centre;
-        
-            % 为当前簇选择颜色
-            clusterColor = Clrs(idx2, :);
-                
+
             % 获取当前簇的所有数据点
             ClusterData = obj.Clusters(idx2).Data;
             length = size(ClusterData,1);
@@ -53,7 +44,7 @@ classdef Visualize
                         
                     % 绘制当前簇的前三维数据点
                     scatter3(data(1), data(2), data(3), ...
-                             20, clusterColor, 'filled');
+                             20, obj.Clusters(idx2).Color, 'filled');
                 end
         
         

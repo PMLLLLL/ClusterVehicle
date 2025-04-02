@@ -1,5 +1,6 @@
-classdef CEDAS
+classdef CEDASSSSS
 
+    % 试图更新方向性为两个变量
     properties(Access = public)
         ID = 0;
         clusters;
@@ -13,7 +14,7 @@ classdef CEDAS
     end
 
     methods(Access = public)
-        function obj = CEDAS(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerwei)
+        function obj = CEDASSSSS(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerwei)
            % 新建类，将簇初始化 初始长度为0
            obj.clusters = struct('ID',{},'Color',{},'Data', {}, 'Centre', {},'allCenter',{}, 'allDirection', {}, 'Direction', {},'Life', {});
            obj.rad = rad;
@@ -65,12 +66,12 @@ classdef CEDAS
             bestScore = -inf;
             bestClusterIdx = -1;
             
-            sampleDirection = sample(1:3); % 仅取前三维用于方向计算
+            sampleDirection = sample([1,3]); % 仅取第一维和第三维用于方向计算
             
             % fprintf(logtext, '对聚类半径之内的簇计算收益 '); % 写入日志文件每次计算簇的距离
             for i = validClusters
                 % 计算方向性匹配度
-                direction_vector = sampleDirection - obj.clusters(i).Centre(1:3);
+                direction_vector = sampleDirection - obj.clusters(i).Centre([1,3]);
                 dirNorm = norm(direction_vector);
                 
                 CosSim = dot(direction_vector, obj.clusters(i).Direction) / (dirNorm * norm(obj.clusters(i).Direction));
@@ -127,11 +128,11 @@ classdef CEDAS
             newCluster.Data = newSample;            % 新簇中仅包含当前数据
             newCluster.Centre = newSample(1:4);          % 簇中心初始为当前数据
             newCluster.Life = 1;                    % 初始生命周期
-            newCluster.Direction = obj.initDirection / sqrt(3); % 初始方向为均匀向量 应该不给车道号权重
+            newCluster.Direction = obj.initDirection / sqrt(2); % 初始方向为均匀向量 应该不给车道号权重
 
             % 记录簇的历史数据
             newCluster.allCentre = newSample(1:4);
-            newCluster.allDirection = obj.initDirection / sqrt(3);
+            newCluster.allDirection = obj.initDirection / sqrt(2);
             if isempty(obj.clusters)
                 obj.clusters = newCluster;
             else
@@ -165,7 +166,7 @@ classdef CEDAS
         % 更新簇的方向性
         function obj = UpdateClusterDirection(obj, clusterIndex,newSample)
             % 使用当前簇方向和新样本的方向加权更新
-            direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
+            direction = newSample([1,3]) - obj.clusters(clusterIndex).Centre([1,3]);
             newDirection = obj.refreshDirWei(1) * obj.clusters(clusterIndex).Direction + obj.refreshDirWei(2) * (direction / norm(direction));
             obj.clusters(clusterIndex).Direction = newDirection / norm(newDirection); % 归一化
             
