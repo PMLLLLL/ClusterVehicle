@@ -35,9 +35,9 @@ classdef DataProcessing
 
             for j = 1:length(Clusters)
                 %数据第五列存储着真实标签
-                obj.trueLabels = [obj.trueLabels Clusters(j).Data(:,5)'];
+                %obj.trueLabels = [obj.trueLabels Clusters(j).Data(:,5)'];
                 % 第几个聚类代表分到第几个类别
-                obj.clusterLabels = [obj.clusterLabels repmat(j, 1, length(Clusters(j).Data(:,5)))];
+                %obj.clusterLabels = [obj.clusterLabels repmat(j, 1, length(Clusters(j).Data(:,5)))];
             end
         end
 
