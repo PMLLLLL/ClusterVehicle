@@ -1,20 +1,25 @@
-function reslut = NormalizeData(data)
+function reslut = NormalizeData(data,normalizemethodname)
+    % 对数据1 2 3列使用归一化，第四列使用normalizemethodname方法归一化
 
-        % 要处理的列 1 2 3列使用最大最小值归一化
-        columns_to_process = [1,2,3];
-
-        for idx = columns_to_process
-            data(:,idx) = MaxMinNormalization(data(:,idx),min(data(:,idx)),max(data(:,idx)));
-        end
-
-        % % 第四列磁场使用分层归一化
-        % DataMG(:, 4) = HierarchicalNormalization(DataMG(:, 4));
-
-        % % 第四列磁场使用对数归一化
-        % DataMG(:, 4) = LogNormalization(DataMG(:, 4));
-
-        % 第四列磁场使用最大最小值归一化
-        data(:, 4) = MaxMinNormalization(data(:, 4),min(data(:, 4)),max(data(:, 4)));
+    % 要处理的列 1 2 3列使用最大最小值归一化
+    columns_to_process = [1,2,3];
     
-        reslut = data;
+    for idx = columns_to_process
+        data(:,idx) = MaxMinNormalization(data(:,idx),min(data(:,idx)),max(data(:,idx)));
     end
+
+    % 选用第四列磁场归一化的方案
+    switch normalizemethodname  % 使用lower使匹配不区分大小写
+        case 'HierarchicalNormalization'
+            data(:, 4) = HierarchicalNormalization(data(:, 4));
+        case 'LogNormalization'
+            data(:, 4) = LogNormalization(data(:, 4));
+        case 'MaxMinNormalization'
+            data(:, 4) = MaxMinNormalization(data(:, 4),min(data(:, 4)),max(data(:, 4)));
+        otherwise
+            error('Unknown method: %s', methodName);
+    end
+    
+    
+    reslut = data;
+end

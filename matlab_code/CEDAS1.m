@@ -1,6 +1,5 @@
-classdef CEDASSSSS
-
-    % 试图更新方向性为两个变量
+classdef CEDAS1
+    % 修改得分距离计算，使用最大距离代替半径
     properties(Access = public)
         ID = 0;
         clusters;
@@ -14,7 +13,7 @@ classdef CEDASSSSS
     end
 
     methods(Access = public)
-        function obj = CEDAS(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerwei)
+        function obj = CEDAS1(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerwei)
            % 新建类，将簇初始化 初始长度为0
            obj.clusters = struct('ID',{},'Color',{},'Data', {}, 'Centre', {},'allCenter',{}, 'allDirection', {}, 'Direction', {},'Life', {});
            obj.rad = rad;
@@ -66,18 +65,21 @@ classdef CEDASSSSS
             bestScore = -inf;
             bestClusterIdx = -1;
             
-            sampleDirection = sample([1,3]); % 仅取第一维和第三维用于方向计算
+            sampleDirection = sample(1:3); % 仅取前三维用于方向计算
+
+            % 计算距离最大的一个值用于归一化
+            distancesMax = max(distances);
             
             % fprintf(logtext, '对聚类半径之内的簇计算收益 '); % 写入日志文件每次计算簇的距离
             for i = validClusters
                 % 计算方向性匹配度
-                direction_vector = sampleDirection - obj.clusters(i).Centre([1,3]);
+                direction_vector = sampleDirection - obj.clusters(i).Centre(1:3);
                 dirNorm = norm(direction_vector);
                 
                 CosSim = dot(direction_vector, obj.clusters(i).Direction) / (dirNorm * norm(obj.clusters(i).Direction));
                 
                 % 归一化距离
-                NormDist = distances(i) / obj.rad;
+                NormDist = distances(i) / distancesMax;
 
                 % fprintf(logtext, '第%d个簇方向为%.2f ',i,CosSim);
                 
@@ -128,11 +130,11 @@ classdef CEDASSSSS
             newCluster.Data = newSample;            % 新簇中仅包含当前数据
             newCluster.Centre = newSample(1:4);          % 簇中心初始为当前数据
             newCluster.Life = 1;                    % 初始生命周期
-            newCluster.Direction = obj.initDirection / sqrt(2); % 初始方向为均匀向量 应该不给车道号权重
+            newCluster.Direction = obj.initDirection / sqrt(3); % 初始方向为均匀向量 应该不给车道号权重
 
             % 记录簇的历史数据
             newCluster.allCentre = newSample(1:4);
-            newCluster.allDirection = obj.initDirection / sqrt(2);
+            newCluster.allDirection = obj.initDirection / sqrt(3);
             if isempty(obj.clusters)
                 obj.clusters = newCluster;
             else
@@ -147,11 +149,8 @@ classdef CEDASSSSS
             obj.clusters(clusterIndex).Life = 1; % 重置生命值
         
             % 更新簇中心
-            % direction = (newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3)) / obj.rad;
-            % obj.clusters(clusterIndex).Centre(1:3) = obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei(2) * direction; %增加新加入的权重
-
-            % 第一种更新中心值按照新来的点与之前中心的中间计算
-            obj.clusters(clusterIndex).Centre(1:3) = (obj.clusters(clusterIndex).Centre(1:3) + newSample(1:3))/2;
+            direction = (newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3)) / obj.rad;
+            obj.clusters(clusterIndex).Centre(1:3) = obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei(2) * direction; %增加新加入
         
             % 更新磁场值
             obj.clusters(clusterIndex).Centre(4) = mean([obj.clusters(clusterIndex).Centre(4) newSample(4)]);

@@ -1,6 +1,6 @@
 clc; clear; close all;
 
-path = '../2025.3.21 12.16换道整理 - 减少其他干扰值.xlsx';
+path = '../2025.3.3 85个数据汇总_标签.xlsx';
 
 % 定义目标函数
 objectiveFcn = @(X) TargetFunc(X.weight1, X.weight2, X.weight3, X.weight4, ...
@@ -27,7 +27,7 @@ vars = [
 ];
 
 % 循环次数
-numRuns = 10;
+numRuns = 20;
 bestSolutions = cell(numRuns,1);
 
 
@@ -35,7 +35,7 @@ bestSolutions = cell(numRuns,1);
 for i=1:numRuns
     results = bayesopt(objectiveFcn, vars, ...
         'AcquisitionFunctionName', 'expected-improvement-plus', ...
-        'MaxObjectiveEvaluations', 100, ...
+        'MaxObjectiveEvaluations', 200, ...
         'Verbose', 1);
     
     % 显示最优解

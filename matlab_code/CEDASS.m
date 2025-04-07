@@ -1,5 +1,5 @@
 classdef CEDASS
-    % 修改余弦相似度计算
+    % 修改得分距离计算，使用最大距离代替半径
     properties(Access = public)
         clusters;
         initDirection;
@@ -80,7 +80,7 @@ classdef CEDASS
                 CosSim = dot(direction_vector, obj.clusters(i).Direction) / (dirNorm * norm(obj.clusters(i).Direction));
                 
                 % 归一化距离
-                NormDist = distances(i) / distancesMax;
+                NormDist = distances(i) / obj.rad;
                 
                 % 计算收益
                 score = obj.scoreWei(1) * (1 - NormDist) + obj.scoreWei(2) * CosSim;
@@ -131,8 +131,8 @@ classdef CEDASS
         
             % 更新簇中心
             % direction = (newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3)) / obj.rad;
-            % obj.clusters(clusterIndex).Centre(1:3) = obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei(2) * newSample(1:3); %增加新加入的权重
-            obj.clusters(clusterIndex).Centre(1:3) = (obj.clusters(clusterIndex).Centre(1:3) + newSample(1:3))/2; %增加新加入的权重
+            obj.clusters(clusterIndex).Centre(1:3) = obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei(2) * newSample(1:3); %增加新加入的权重
+            % obj.clusters(clusterIndex).Centre(1:3) = (obj.clusters(clusterIndex).Centre(1:3) + newSample(1:3))/2; %增加新加入的权重
 
             % obj.clusters(clusterIndex).Centre(1:3) = (1+obj.centerWei(1)) * newSample(1:3) - obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3); %增加新加入的权重
 
@@ -146,12 +146,12 @@ classdef CEDASS
         % 更新簇的方向性
         function obj = UpdateClusterDirection(obj, clusterIndex,newSample)
             % 使用当前簇方向和新样本的方向加权更新
-            if(length(obj.clusters(clusterIndex).Data(:,1)) == 1)
-                newDirection = newSample(1:3) - obj.clusters(clusterIndex).Data(1,1:3);
-            else
-                direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
-                newDirection = obj.refreshDirWei(1) * obj.clusters(clusterIndex).Direction + obj.refreshDirWei(2) * (direction / norm(direction));
-            end
+            % if(length(obj.clusters(clusterIndex).Data(:,1)) == 1)
+            %     newDirection = newSample(1:3) - obj.clusters(clusterIndex).Data(1,1:3);
+            % else
+            direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
+            newDirection = obj.refreshDirWei(1) * obj.clusters(clusterIndex).Direction + obj.refreshDirWei(2) * (direction / norm(direction));
+            % end
             obj.clusters(clusterIndex).Direction = newDirection / norm(newDirection); % 归一化
             
         end

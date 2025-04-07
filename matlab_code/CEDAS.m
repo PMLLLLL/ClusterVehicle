@@ -1,5 +1,5 @@
 classdef CEDAS
-
+    % 最原始的计算版本
     properties(Access = public)
         ID = 0;
         clusters;
@@ -146,11 +146,8 @@ classdef CEDAS
             obj.clusters(clusterIndex).Life = 1; % 重置生命值
         
             % 更新簇中心
-            % direction = (newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3)) / obj.rad;
-            % obj.clusters(clusterIndex).Centre(1:3) = obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei(2) * direction; %增加新加入的权重
-
-            % 第一种更新中心值按照新来的点与之前中心的中间计算
-            obj.clusters(clusterIndex).Centre(1:3) = (obj.clusters(clusterIndex).Centre(1:3) + newSample(1:3))/2;
+            direction = (newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3)) / obj.rad;
+            obj.clusters(clusterIndex).Centre(1:3) = obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei(2) * direction; %增加新加入
         
             % 更新磁场值
             obj.clusters(clusterIndex).Centre(4) = mean([obj.clusters(clusterIndex).Centre(4) newSample(4)]);

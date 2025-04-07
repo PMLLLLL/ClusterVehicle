@@ -35,9 +35,9 @@ classdef DataProcessing
 
             for j = 1:length(Clusters)
                 %数据第五列存储着真实标签
-                %obj.trueLabels = [obj.trueLabels Clusters(j).Data(:,5)'];
+                obj.trueLabels = [obj.trueLabels Clusters(j).Data(:,5)'];
                 % 第几个聚类代表分到第几个类别
-                %obj.clusterLabels = [obj.clusterLabels repmat(j, 1, length(Clusters(j).Data(:,5)))];
+                obj.clusterLabels = [obj.clusterLabels repmat(j, 1, length(Clusters(j).Data(:,5)))];
             end
         end
 
@@ -78,6 +78,7 @@ classdef DataProcessing
         % 数据归一化
         function obj = NormalizeData(obj)
             DataMG = sortrows(obj.dataIn, 3); % 按照第三列（位置Y）从小到大排序
+            % DataMG = obj.dataIn;
 
             % 要处理的列 1 2 3列使用最大最小值归一化
             columns_to_process = [1,2,3];
@@ -87,13 +88,13 @@ classdef DataProcessing
             end
 
             % % 第四列磁场使用分层归一化
-            % DataMG(:, 4) = HierarchicalNormalization(DataMG(:, 4));
+            DataMG(:, 4) = HierarchicalNormalization(DataMG(:, 4));
 
             % % 第四列磁场使用对数归一化
             % DataMG(:, 4) = LogNormalization(DataMG(:, 4));
 
             % 第四列磁场使用最大最小值归一化
-            DataMG(:, 4) = MaxMinNormalization(DataMG(:, 4),min(DataMG(:, 4)),max(DataMG(:, 4)));
+            % DataMG(:, 4) = MaxMinNormalization(DataMG(:, 4),min(DataMG(:, 4)),max(DataMG(:, 4)));
         
             obj.normalizedData = DataMG;
         end

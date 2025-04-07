@@ -1,6 +1,7 @@
 classdef CEDASSSSS
 
-    % 试图更新方向性为两个变量
+    % 更新方向性为两个变量
+    % 中心更新计算修改
     properties(Access = public)
         ID = 0;
         clusters;

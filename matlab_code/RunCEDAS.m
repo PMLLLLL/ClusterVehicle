@@ -7,12 +7,12 @@ clear;
 decay = 0.000001; % 衰减因子
 
 % 初始权重
-% rad = 5;
-% weights = [0.4, 0.2, 0.2, 0.2]; % 
-% initDirection = [1 0 1];
-% refreshDirWei = [0.5 0.5];
-% scoreWei = [0.2 0.8];
-% centerWei = [1 0.1];
+rad = 5;
+weights = [0.4, 0.2, 0.2, 0.2]; % 
+initDirection = [1 0 1];
+refreshDirWei = [0.5 0.5];
+scoreWei = [0.2 0.8];
+centerWei = [1 0.1];
 
 % rad = 1.5393;
 % weights = [0.21746    0.22789    0.96373    0.75239]; 
@@ -71,8 +71,8 @@ decay = 0.000001; % 衰减因子
 
 % 经过磁场分层归一化后优化16的值 0.9598
 % rad = 11.724;
-% % weights = [0.42901    0.52784    0.37931    0.3231]; 
-% weights = [1    1    1    1]; 
+% weights = [0.42901    0.52784    0.37931    0.3231]; 
+% % weights = [1    1    1    1]; 
 % initDirection = [0.81637           0.16181           0.86436];
 % refreshDirWei = [0.46104           0.70625];
 % scoreWei = [0.86181      0.97457];
@@ -103,12 +103,12 @@ decay = 0.000001; % 衰减因子
 % centerWei = [0.95566 1];
 
 % 多辆车分层归一化后优化的值 0.9940
-rad = 0.41974;
-weights = [0.34965    0.35665    0.39604    0.35799]; 
-initDirection = [0.28821           0.84255           0.58017];
-refreshDirWei = [0.50008           0.67771];
-scoreWei = [0.7802 0.35717];
-centerWei = [1       0.11883];
+% rad = 0.41974;
+% weights = [0.34965    0.35665    0.39604    0.35799]; 
+% initDirection = [0.28821           0.84255];
+% refreshDirWei = [0.50008           0.67771];
+% scoreWei = [0.7802 0.35717];
+% centerWei = [1       0.11883];
 
 % 聚类结果的数量: 86 总体的 RI = 0.9938  JC = 0.6535  FMI = 0.7906 
 % 聚类结果的数量: 86 大车的 RI = 0.9933  JC = 0.6969  FMI = 0.8216 
@@ -160,9 +160,16 @@ centerWei = [1       0.11883];
 % scoreWei = [0.31148      0.73333];
 % centerWei = [1.9801       0.11883];
 
+% rad = 5.7503;
+% weights = [0.36732    0.77182    0.12167    0.45508]; 
+% initDirection = [0.6131           0.61987            0.9525];
+% refreshDirWei = [0.83426          0.83426];
+% scoreWei = [0.48785      0.48785];
+% centerWei = [0.022847      0.54525];
 
 
-path = '../2025.3.3 85个数据汇总_标签.xlsx';
+
+PATH = '../2025.3.3 85个数据汇总_标签.xlsx';
 
 % 数据加载与归一化
 %DataIn = readmatrix('../2025.2.25 大车数据合并_真实标签.xlsx');
@@ -175,11 +182,12 @@ path = '../2025.3.3 85个数据汇总_标签.xlsx';
 %DataIn = readmatrix('../2025.3.21 12.16换道整理 - 减少其他干扰值.xlsx');
 %DataIn = readmatrix('../2025.3.26 12.16原始数据(除去磁场方向unknow的值).xlsx');
 
-DataOper = DataProcessing(path);
+
+normalizedData = NormalizeDataFromFile(PATH,'HierarchicalNormalization');
 
 % 聚类处理
 
-CE = CEDAS(rad, ...
+CE = CEDAS1(rad, ...
     decay, ...
     weights, ...
     initDirection, ...
@@ -187,21 +195,14 @@ CE = CEDAS(rad, ...
     scoreWei, ...
     centerWei); % 用于存储聚类结果
 
-for t = 1:size(DataOper.normalizedData, 1)
+for t = 1:size(normalizedData, 1)
     % 调用 CEDAS_demo3 算法
-    CE = CE.Clustering(DataOper.normalizedData(t,:));
+    CE = CE.Clustering(normalizedData(t,:));
 end
 
-% 计算真实标签和混淆矩阵
-DataOper = DataOper.GetLabel(CE.clusters);
-% DataOper = DataOper.GetContingencyMatrix();
-% DataOper.Output2Excel('out.xlsx',CE.clusters);
+% 显示聚类结果
+ClustersImg(CE.clusters);
 
-% 初始化显示类
-show = Visualize(CE.clusters,DataOper.trueLabels,DataOper.clusterLabels,DataOper.contingencyMatrix);
-%show.ContingencyHeatMap1();
-%show.ContingencyHeatMap2();
-show.ClustersImg;
 
 %% 分别计算总体结果的标签 小车的标签 大车的标签
 ClusterDataTable = GetClusterDataTable(CE.clusters);
@@ -210,6 +211,7 @@ bigvehicleDataTable = ClusterDataTable(ClusterDataTable(:,6)==2,:);
 
 trueLables = ClusterDataTable(:,5);
 clusterLables = ClusterDataTable(:,7);
+
 littlevehicletrueLables = littlevehicleDataTable(:,5);
 littlevehicleclusterLables = littlevehicleDataTable(:,7);
 bigvehicletrueLables = bigvehicleDataTable(:,5);
@@ -217,6 +219,7 @@ bigvehicleclusterLables = bigvehicleDataTable(:,7);
 %% 分别计算总体 大车 小车的RI JC FMI
 
 [RI,JC,FMI]=GetRI_JC_FMI(trueLables,clusterLables);
+
 [littleRI,littleJC,littleFMI]=GetRI_JC_FMI(littlevehicletrueLables,littlevehicleclusterLables);
 [bigRI,bigJC,bigFMI]=GetRI_JC_FMI(bigvehicletrueLables,bigvehicleclusterLables);
 
