@@ -190,11 +190,7 @@ for Num = 1:dataNum
     title('算法平均排名 (1=最好)');
     if(mod(Num,3)==1)
         xtitle = sprintf("RI平均排名 p =  %.2f Kendall''s W = %.3f\n",p_value,W);
-    elseif(mod(Num,3)==2)
-        xtitle = sprintf("JC平均排名 p =  %.2f Kendall''s W = %.3f\n",p_value,W);
     else
-        xtitle = sprintf("FMI平均排名 p =  %.2f Kendall''s W = %.3f\n",p_value,W);
-    end
     xlabel(xtitle);
     grid on;
 end

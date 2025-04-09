@@ -1,3 +1,5 @@
+% 判断方法改进效果的好坏
+
 clear;
 
 DECAY = 0.000001; % 衰减因子
@@ -6,11 +8,14 @@ DECAY = 0.000001; % 衰减因子
 PATH = '../2025.3.3 85个数据汇总_标签.xlsx';
 originData = readmatrix(PATH);
 dataSize = size(originData, 1);
-NORMALIZATION_METHODS = ["MaxMinNormalization","LogNormalization","HierarchicalNormalization"];
+METHOD_COMPARE = {@CEDAS, @CEDAS1,@CEDASSSSS};
+METHODS_NAME_CEDAS = string(cellfun(@func2str, METHOD_COMPARE, 'UniformOutput', false));
+METHODS_NUM = length(METHODS_NAME_CEDAS);
 
 % 读取20input 的一共20组参数
 PARAMETERS_FILE_NAME = "20input.mat";
 inputParams = cellfun(@(x) x.XAtMinObjective, load(PARAMETERS_FILE_NAME).bestSolutions, 'UniformOutput', false)';
+PARAS_NUM = length(inputParams);
 
 % 用一个table存储所有参数
 % for i = 1:length(inputParams)
@@ -21,20 +26,20 @@ inputParams = cellfun(@(x) x.XAtMinObjective, load(PARAMETERS_FILE_NAME).bestSol
 % 记录运行次数
 clusterCounts = 0;
 
-dataStore1 = zeros(3,60);
-dataStore2 = zeros(3,60);
-dataStore3 = zeros(3,60);
-dataStore4 = zeros(3,60);
+dataStore1 = zeros(3,PARAS_NUM*METHODS_NUM);
+dataStore2 = zeros(3,PARAS_NUM*METHODS_NUM);
+dataStore3 = zeros(3,PARAS_NUM*METHODS_NUM);
+dataStore4 = zeros(3,PARAS_NUM*METHODS_NUM);
 
-for methodName = NORMALIZATION_METHODS
-    normalizedData = NormalizeData(originData,methodName);
-    normalizedData = sortrows(normalizedData,3);
+normalizedData = NormalizeData(originData,"MaxMinNormalization");
+normalizedData = sortrows(normalizedData,3);
+
+for i = 1:length(METHOD_COMPARE)
 
     % 对20组参数运行结果
     for para = inputParams
 
-        % 初始化聚类参数
-        CE = CEDAS(para{1}.rad, ...
+        CE = METHOD_COMPARE{i}(para{1}.rad, ...
         DECAY, ...
         [para{1}.weight1 para{1}.weight2 para{1}.weight3 para{1}.weight4],...
         [para{1}.initDirection1 para{1}.initDirection2 para{1}.initDirection3], ...
@@ -43,9 +48,8 @@ for methodName = NORMALIZATION_METHODS
         [para{1}.centerWei1 para{1}.centerWei2]);
 
         % 输出参数方法值
-        fprintf(['当前归一化方法: %s \n' ...
-            '当前参数: \n'],...
-            methodName);
+        fprintf(['当前方法:%s   \n' ...
+            '当前参数: \n'],class(CE));
         disp(para{1});
 
         % 调用 CEDAS_demo3 算法
@@ -93,21 +97,21 @@ for methodName = NORMALIZATION_METHODS
     end
 end
 
-dataRI = reshape(dataStore1(1,:),20,3);
-dataJC = reshape(dataStore1(2,:),20,3);
-dataFMI = reshape(dataStore1(3,:),20,3);
+dataRI = reshape(dataStore1(1,:),20,METHODS_NUM);
+dataJC = reshape(dataStore1(2,:),20,METHODS_NUM);
+dataFMI = reshape(dataStore1(3,:),20,METHODS_NUM);
 
-littledataRI = reshape(dataStore2(1,:),20,3);
-littledataJC = reshape(dataStore2(2,:),20,3);
-littledataFMI = reshape(dataStore2(3,:),20,3);
+littledataRI = reshape(dataStore2(1,:),20,METHODS_NUM);
+littledataJC = reshape(dataStore2(2,:),20,METHODS_NUM);
+littledataFMI = reshape(dataStore2(3,:),20,METHODS_NUM);
 
-bigdataRI = reshape(dataStore3(1,:),20,3);
-bigdataJC = reshape(dataStore3(2,:),20,3);
-bigdataFMI = reshape(dataStore3(3,:),20,3);
+bigdataRI = reshape(dataStore3(1,:),20,METHODS_NUM);
+bigdataJC = reshape(dataStore3(2,:),20,METHODS_NUM);
+bigdataFMI = reshape(dataStore3(3,:),20,METHODS_NUM);
 
-weightdataRI = reshape(dataStore4(1,:),20,3);
-weightdataJC = reshape(dataStore4(2,:),20,3);
-weightdataFMI = reshape(dataStore4(3,:),20,3);
+weightdataRI = reshape(dataStore4(1,:),20,METHODS_NUM);
+weightdataJC = reshape(dataStore4(2,:),20,METHODS_NUM);
+weightdataFMI = reshape(dataStore4(3,:),20,METHODS_NUM);
 
 dataAll=[dataRI;
         dataJC;
@@ -137,15 +141,6 @@ for Num = 1:dataNum
     % 2. 执行Friedman检验
     fprintf('=== Friedman检验 ===\n');
     [p_value, tbl, stats] = friedman(performance, 1, 'off');
-
-    % 提取卡方值和自由度
-    chi2 = tbl{2,5};  % 卡方值在ANOVA表的第2行第5列
-    m = size(performance, 1); % 被试数（区组数）
-    k = size(performance, 2); % 方法数（组别数）
-    
-    % 计算Kendall's W
-    W = chi2 / (m * (k - 1));
-    fprintf('Kendall''s W = %.3f\n', W);
     
     % 显示检验结果
     disp(tbl);
@@ -171,12 +166,12 @@ for Num = 1:dataNum
     average_ranks = mean(ranks);
     
     % 显示排名结果
-    for i = 1:length(NORMALIZATION_METHODS)
-        fprintf('%s: 平均排名 %.2f\n', NORMALIZATION_METHODS{i}, average_ranks(i));
+    for i = 1:length(METHODS_NAME_CEDAS)
+        fprintf('%s: 平均排名 %.2f\n', METHODS_NAME_CEDAS{i}, average_ranks(i));
     end
     
     % 创建排名表格
-    rank_table = table(NORMALIZATION_METHODS', average_ranks', ...
+    rank_table = table(METHODS_NAME_CEDAS', average_ranks', ...
         'VariableNames', {'Algorithm', 'AverageRank'});
     rank_table = sortrows(rank_table, 'AverageRank');
     
@@ -186,16 +181,10 @@ for Num = 1:dataNum
     % 子图2: 平均排名条形图
     subplot(4,3,Num);
     barh(average_ranks);
-    set(gca, 'YTick', 1:length(NORMALIZATION_METHODS), 'YTickLabel', NORMALIZATION_METHODS);
+    set(gca, 'YTick', 1:length(METHODS_NAME_CEDAS), 'YTickLabel', METHODS_NAME_CEDAS);
     title('算法平均排名 (1=最好)');
-    if(mod(Num,3)==1)
-        xtitle = sprintf("RI平均排名 p =  %.2f Kendall''s W = %.3f\n",p_value,W);
-    elseif(mod(Num,3)==2)
-        xtitle = sprintf("JC平均排名 p =  %.2f Kendall''s W = %.3f\n",p_value,W);
-    else
-        xtitle = sprintf("FMI平均排名 p =  %.2f Kendall''s W = %.3f\n",p_value,W);
-    end
-    xlabel(xtitle);
+    % xtitle = sprintf("平均排名 %d ",Num);
+    xlabel("平均排名");
     grid on;
 end
 %%

@@ -14,6 +14,9 @@ function ClustersImg(Clusters)
     % 获取当前簇的所有数据点
     ClusterData = Clusters(idx2).Data;
     length = size(ClusterData,1);
+    if(length <= 6)
+        continue;
+    end
         
         for idx3 = 1 : length
             % 获取簇中的每个数据点

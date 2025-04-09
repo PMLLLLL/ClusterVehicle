@@ -16,7 +16,6 @@ classdef DataProcessing
         function obj = DataProcessing(datapath,trainIdx)
             %DATAPROCESSING 构造此类的实例
             %   读取数据并排序归一化
-
             if nargin > 1
                 obj.dataIn = readmatrix(datapath);
                 obj.dataIn = obj.dataIn(trainIdx,:);

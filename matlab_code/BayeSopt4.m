@@ -6,7 +6,7 @@ path = '../2025.3.3 85个数据汇总_标签.xlsx';
 objectiveFcn = @(X) TargetFunc4(X.weight1, X.weight2, X.weight3, X.weight4, ...
                                X.initDirection1, X.initDirection2, ...
                                X.refreshDirWei1,X.refreshDirWei2,X.scoreWei1,X.scoreWei2, ...
-                               X.rad,path,[]);
+                               X.rad,X.startPreNum,path,[]);
 
 % 定义多个优化变量 (搜索空间)
 vars = [
@@ -21,10 +21,11 @@ vars = [
     optimizableVariable('scoreWei1', [0, 6], 'Type', 'real')
     optimizableVariable('scoreWei2', [0, 6], 'Type', 'real')
     optimizableVariable('rad', [0, 15], 'Type', 'real')
+    optimizableVariable('startPreNum', [2, 15], 'Type', 'real')
 ];
 
 % 循环次数
-numRuns = 10;
+numRuns = 100;
 bestSolutions = cell(numRuns,1);
 
 
@@ -33,6 +34,7 @@ for i=1:numRuns
     results = bayesopt(objectiveFcn, vars, ...
         'AcquisitionFunctionName', 'expected-improvement-plus', ...
         'MaxObjectiveEvaluations', 200, ...
+        'UseParallel', true, ...
         'Verbose', 1);
     
     % 显示最优解

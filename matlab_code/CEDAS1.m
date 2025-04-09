@@ -1,5 +1,7 @@
 classdef CEDAS1
-    % 修改得分距离计算，使用最大距离代替半径
+
+    % 更新方向性为两个变量
+    % 中心更新计算修改
     properties(Access = public)
         ID = 0;
         clusters;
@@ -9,20 +11,20 @@ classdef CEDAS1
         weights;
         refreshDirWei;
         scoreWei;
-        centerWei;
+        startPreNum;
     end
 
     methods(Access = public)
-        function obj = CEDAS1(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerwei)
+        function obj = CEDAS1(rad, decay,weights,initDirection,refreshdirWei,scorewei,startPreNum)
            % 新建类，将簇初始化 初始长度为0
-           obj.clusters = struct('ID',{},'Color',{},'Data', {}, 'Centre', {},'allCenter',{}, 'allDirection', {}, 'Direction', {},'Life', {});
+           obj.clusters = struct('ID',{},'Color',{},'Data', {},'DataScore', {}, 'Centre', {},'allCenter',{}, 'allDirection', {}, 'Direction', {},'Life', {});
            obj.rad = rad;
            obj.decay = decay;
            obj.weights = weights;
            obj.initDirection = initDirection;
            obj.refreshDirWei = refreshdirWei;
            obj.scoreWei = scorewei;
-           obj.centerWei = centerwei;
+           obj.startPreNum = startPreNum;
         end
 
         function obj = Clustering(obj,sample)
@@ -42,7 +44,19 @@ classdef CEDAS1
             for i = 1:numClusters
                 if max(obj.clusters(i).Data(:, 1)) < sample(1) % % 取簇的第一列数据筛选符合条件的簇
                     % 计算加权欧几里得距离
-                    distances(i) = sqrt(sum((obj.weights(1:4) .* (sample(1:4) - obj.clusters(i).Centre(1:4))).^2));
+                    if(length(obj.clusters(i).Data(:, 1)) >= obj.startPreNum)
+                        oA = obj.clusters(i).Data(end-1,1:3);
+                        oB = obj.clusters(i).Data(end,1:3);
+                        n = oB(1)-oA(1);
+
+                        pre = (oB-oA)/n*(sample(1)-oB(1))+oB;
+
+                        distances(i) = sqrt(sum((obj.weights(1:4) .* (sample(1:4) - [pre obj.clusters(i).Centre(4)])).^2));
+                    else
+                        distances(i) = sqrt(sum((obj.weights(1:4) .* (sample(1:4) - obj.clusters(i).Centre(1:4))).^2));
+                    end
+                    
+                    
                     % fprintf(logtext, '与第%d个簇的距离为%.2f ',i,distances(i)); % 写入日志文件每次计算簇的距离
                     validClusters(i) = distances(i) < obj.rad; % 记录满足距离条件的簇
                 else
@@ -65,26 +79,23 @@ classdef CEDAS1
             bestScore = -inf;
             bestClusterIdx = -1;
             
-            sampleDirection = sample(1:3); % 仅取前三维用于方向计算
-
-            % 计算距离最大的一个值用于归一化
-            distancesMax = max(distances);
+            sampleDirection = sample([1,3]); % 仅取第一维和第三维用于方向计算
             
             % fprintf(logtext, '对聚类半径之内的簇计算收益 '); % 写入日志文件每次计算簇的距离
             for i = validClusters
                 % 计算方向性匹配度
-                direction_vector = sampleDirection - obj.clusters(i).Centre(1:3);
+                direction_vector = sampleDirection - obj.clusters(i).Centre([1,3]);
                 dirNorm = norm(direction_vector);
                 
                 CosSim = dot(direction_vector, obj.clusters(i).Direction) / (dirNorm * norm(obj.clusters(i).Direction));
                 
                 % 归一化距离
-                NormDist = distances(i) / distancesMax;
+                NormDist = distances(i) / obj.rad;
 
                 % fprintf(logtext, '第%d个簇方向为%.2f ',i,CosSim);
                 
                 % 计算收益
-                score = obj.scoreWei(1) * (1 - NormDist) + obj.scoreWei(2) * CosSim;
+                score = obj.scoreWei(1) * (1-NormDist) + obj.scoreWei(2) * CosSim;
                 % fprintf(logtext, '计算得到的收益为%.2f',score); % 写入日志文件每次计算簇的距离
                 % 更新最佳簇索引
                 if score > bestScore
@@ -95,7 +106,7 @@ classdef CEDAS1
             
             % 选择最佳簇或创建新簇
             if bestScore > 0.3
-                obj = obj.AssignToCluster(bestClusterIdx, sample);
+                obj = obj.AssignToCluster(bestClusterIdx, sample,bestScore,1/distances(bestClusterIdx),CosSim);
                 % fprintf(logtext, '收益最佳的簇为第%d个,且得分为%.2f,将数据加入到第%d个簇',bestClusterIdx,bestScore,bestClusterIdx); % 写入日志文件每次计算簇的距离
             else
                 obj = obj.InitNewCluster(sample);
@@ -128,13 +139,15 @@ classdef CEDAS1
             newCluster.Color = GetColorByIndex(newCluster.ID);
 
             newCluster.Data = newSample;            % 新簇中仅包含当前数据
+            newCluster.DataScore = [inf inf inf];
+            
             newCluster.Centre = newSample(1:4);          % 簇中心初始为当前数据
             newCluster.Life = 1;                    % 初始生命周期
-            newCluster.Direction = obj.initDirection / sqrt(3); % 初始方向为均匀向量 应该不给车道号权重
+            newCluster.Direction = obj.initDirection / sqrt(2); % 初始方向为均匀向量 应该不给车道号权重
 
             % 记录簇的历史数据
             newCluster.allCentre = newSample(1:4);
-            newCluster.allDirection = obj.initDirection / sqrt(3);
+            newCluster.allDirection = obj.initDirection / sqrt(2);
             if isempty(obj.clusters)
                 obj.clusters = newCluster;
             else
@@ -143,20 +156,22 @@ classdef CEDAS1
         end
 
         % 将新数据分配到现有簇
-        function obj = AssignToCluster(obj,clusterIndex,newSample)
+        function obj = AssignToCluster(obj,clusterIndex,newSample,bestScore,NormDist,CosSim)
             % 分配数据到现有簇
             obj.clusters(clusterIndex).Data = [obj.clusters(clusterIndex).Data; newSample]; % 加入新点
             obj.clusters(clusterIndex).Life = 1; % 重置生命值
-        
-            % 更新簇中心
-            direction = (newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3)) / obj.rad;
-            obj.clusters(clusterIndex).Centre(1:3) = obj.centerWei(1) * obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei(2) * direction; %增加新加入
+
+            % 第一种更新中心值按照新来的点与之前中心的中间计算
+            obj.clusters(clusterIndex).Centre(1:3) = (obj.clusters(clusterIndex).Centre(1:3) + newSample(1:3))/2;
         
             % 更新磁场值
             obj.clusters(clusterIndex).Centre(4) = mean([obj.clusters(clusterIndex).Centre(4) newSample(4)]);
         
             % 记录簇的历史中心
             obj.clusters(clusterIndex).allCentre = [obj.clusters(clusterIndex).allCentre;obj.clusters(clusterIndex).Centre];
+
+            % 记录当前数据的得分情况
+            obj.clusters(clusterIndex).DataScore = [obj.clusters(clusterIndex).DataScore; bestScore NormDist CosSim];
 
             % 更新方向性
             obj = UpdateClusterDirection(obj,clusterIndex, newSample);
@@ -165,7 +180,7 @@ classdef CEDAS1
         % 更新簇的方向性
         function obj = UpdateClusterDirection(obj, clusterIndex,newSample)
             % 使用当前簇方向和新样本的方向加权更新
-            direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
+            direction = newSample([1,3]) - obj.clusters(clusterIndex).Centre([1,3]);
             newDirection = obj.refreshDirWei(1) * obj.clusters(clusterIndex).Direction + obj.refreshDirWei(2) * (direction / norm(direction));
             obj.clusters(clusterIndex).Direction = newDirection / norm(newDirection); % 归一化
             
