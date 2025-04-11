@@ -5,7 +5,7 @@ clear;
 % 参数设置
 decay = 0.000001; % 衰减因子
 
-% 2025.3.3 85个数据汇总_标签.xlsx 对数归一化 优化的值 CEDAS1
+% 多辆车分层归一化后优化的值 CEDAS1
 % rad = 11.573;
 % weights = [0.35192    0.38106    0.029329    0.50981]; 
 % initDirection = [0.59369           0.082637];
@@ -18,7 +18,7 @@ decay = 0.000001; % 衰减因子
 % 聚类结果的数量: 80 小车的 RI = 0.9845  JC = 0.7935  FMI = 0.8859 
 % 聚类结果的数量: 80 大车小车的加权 RI = 0.9869  JC = 0.7943  FMI = 0.8861 
 
-% 2025.3.3 85个数据汇总_标签.xlsx 对数归一化 优化的值 CEDAS1
+% 多辆车分层归一化后优化的值 CEDAS1
 % rad = 0.18053;
 % weights = [0.36873    0.35803    0.23627    0.45407]; 
 % initDirection = [0.72665           0.17735];
@@ -32,20 +32,19 @@ decay = 0.000001; % 衰减因子
 % 聚类结果的数量: 95 小车的 RI = 0.9845  JC = 0.7894  FMI = 0.8847 
 % 聚类结果的数量: 95 大车小车的加权 RI = 0.9871  JC = 0.7966  FMI = 0.8887 
 
+% 多辆车分层归一化后优化的值 CEDAS1
+rad = 14.569;
+weights = [0.58415     0.138     0.42784    0.20305]; 
+initDirection = [0.23764           0.022596];
+%refreshDirWei = [0.22222           0.42393];
+refreshDirWei = [0.42642           0.65564];
+scoreWei = [0.026359      0.51344];
+startPreNum = 13.749;
 
-% 2025.3.3 85个数据汇总_标签.xlsx 对数归一化 优化的值 CEDAS2
-rad = 14.609;
-weights = [0.35923    0.37899    0.30661    0.40316]; 
-initDirection = [0.47258           0.046044];
-refreshDirWei = [0.40647           0.10644];
-scoreWei = [0.1479       8.6561];
-startPreNum = 14.502;
-centerWei = 0.71944;
-
-% 聚类结果的数量: 82 总体的 RI = 0.9960  JC = 0.7673  FMI = 0.8683 
-% 聚类结果的数量: 82 大车的 RI = 0.9961  JC = 0.8142  FMI = 0.8976 
-% 聚类结果的数量: 82 小车的 RI = 0.9802  JC = 0.7413  FMI = 0.8528 
-% 聚类结果的数量: 82 大车小车的加权 RI = 0.9836  JC = 0.7569  FMI = 0.8624 
+% 聚类结果的数量: 82 总体的 RI = 0.9959  JC = 0.7597  FMI = 0.8634 
+% 聚类结果的数量: 82 大车的 RI = 0.9961  JC = 0.8101  FMI = 0.8953 
+% 聚类结果的数量: 82 小车的 RI = 0.9797  JC = 0.7348  FMI = 0.8486 
+% 聚类结果的数量: 82 大车小车的加权 RI = 0.9832  JC = 0.7510  FMI = 0.8587 
 
 
 PATH = '../2025.3.3 85个数据汇总_标签.xlsx';
@@ -66,21 +65,12 @@ normalizedData = NormalizeDataFromFile(PATH,'LogNormalization');
 
 % 聚类处理
 
-% CE = CEDAS1(rad, ...
-%     decay, ...
-%     weights, ...
-%     initDirection, ...
-%     refreshDirWei, ...
-%     scoreWei, ...
-%     startPreNum); % 用于存储聚类结果
-
-CE = CEDAS2(rad, ...
+CE = CEDAS1(rad, ...
     decay, ...
     weights, ...
     initDirection, ...
     refreshDirWei, ...
     scoreWei, ...
-    centerWei, ...
     startPreNum); % 用于存储聚类结果
 
 for t = 1:size(normalizedData, 1)

@@ -1,4 +1,4 @@
-classdef CEDAS1
+classdef CEDAS2
 
     % 更新方向性为两个变量
     % 中心更新计算修改
@@ -12,10 +12,11 @@ classdef CEDAS1
         refreshDirWei;
         scoreWei;
         startPreNum;
+        centerWei;
     end
 
     methods(Access = public)
-        function obj = CEDAS1(rad, decay,weights,initDirection,refreshdirWei,scorewei,startPreNum)
+        function obj = CEDAS2(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerWei,startPreNum)
            % 新建类，将簇初始化 初始长度为0
            obj.clusters = struct('ID',{},'Color',{},'Data', {},'DataScore', {}, 'Centre', {},'allCenter',{}, 'allDirection', {}, 'Direction', {},'Life', {});
            obj.rad = rad;
@@ -24,6 +25,7 @@ classdef CEDAS1
            obj.initDirection = initDirection;
            obj.refreshDirWei = refreshdirWei;
            obj.scoreWei = scorewei;
+           obj.centerWei = centerWei;
            obj.startPreNum = startPreNum;
         end
 
@@ -164,8 +166,11 @@ classdef CEDAS1
             obj.clusters(clusterIndex).Data = [obj.clusters(clusterIndex).Data; newSample]; % 加入新点
             obj.clusters(clusterIndex).Life = 1; % 重置生命值
 
+            % 新数据的方向
+            direction = newSample(1:3) - obj.clusters(clusterIndex).Centre(1:3);
+
             % 第一种更新中心值按照新来的点与之前中心的中间计算
-            obj.clusters(clusterIndex).Centre(1:3) = (obj.clusters(clusterIndex).Centre(1:3) + newSample(1:3))/2;
+            obj.clusters(clusterIndex).Centre(1:3) = obj.clusters(clusterIndex).Centre(1:3) + obj.centerWei*direction;
         
             % 更新磁场值
             obj.clusters(clusterIndex).Centre(4) = mean([obj.clusters(clusterIndex).Centre(4) newSample(4)]);
