@@ -37,8 +37,8 @@ decay = 0.000001; % 衰减因子
 rad = 14.609;
 weights = [0.35923    0.37899    0.30661    0.40316]; 
 initDirection = [0.47258           0.046044];
-refreshDirWei = [0.40647           0.10644];
-scoreWei = [0.1479       8.6561];
+refreshDirWei = 0.40647;
+scoreWei = 0.1479;
 startPreNum = 14.502;
 centerWei = 0.71944;
 

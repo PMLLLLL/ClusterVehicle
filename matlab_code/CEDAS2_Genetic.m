@@ -1,4 +1,4 @@
-classdef CEDAS2
+classdef CEDAS2_Genetic
 
     % 更新方向性为两个变量
     % 中心更新计算修改
@@ -16,13 +16,13 @@ classdef CEDAS2
     end
 
     methods(Access = public)
-        function obj = CEDAS2(rad, decay,weights,initDirection,refreshdirWei,scorewei,centerWei,startPreNum)
+        function obj = CEDAS2_Genetic(rad, weights1,weights2,weights3,weights4,initDirection1,initDirection2,refreshdirWei,scorewei,centerWei,startPreNum,decay)
            % 新建类，将簇初始化 初始长度为0
            obj.clusters = struct('ID',{},'Color',{},'Data', {},'DataScore', {}, 'Centre', {},'allCenter',{}, 'allDirection', {}, 'Direction', {},'Life', {});
            obj.rad = rad;
            obj.decay = decay;
-           obj.weights = weights;
-           obj.initDirection = initDirection;
+           obj.weights = [weights1,weights2,weights3,weights4];
+           obj.initDirection = [initDirection1,initDirection2];
            obj.refreshDirWei = refreshdirWei;
            obj.scoreWei = scorewei;
            obj.centerWei = centerWei;

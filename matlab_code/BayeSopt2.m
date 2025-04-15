@@ -5,7 +5,7 @@ path = '../2025.3.3 85个数据汇总_标签.xlsx';
 % 定义目标函数
 objectiveFcn = @(X) TargetFunc2(X.weight1, X.weight2, X.weight3, X.weight4, ...
                                X.initDirection1, X.initDirection2, ...
-                               X.refreshDirWei1,X.refreshDirWei2,X.scoreWei1,X.scoreWei2, ...
+                               X.refreshDirWei,X.scoreWei, ...
                                X.centerWei,X.rad,X.startPreNum,path,[]);
 
 % 定义多个优化变量 (搜索空间)
@@ -16,10 +16,8 @@ vars = [
     optimizableVariable('weight4', [0.3, 0.52], 'Type', 'real')
     optimizableVariable('initDirection1', [0, 1], 'Type', 'real')
     optimizableVariable('initDirection2', [0, 1], 'Type', 'real')
-    optimizableVariable('refreshDirWei1', [0, 1], 'Type', 'real')
-    optimizableVariable('refreshDirWei2', [0, 1], 'Type', 'real')
-    optimizableVariable('scoreWei1', [0, 10], 'Type', 'real')
-    optimizableVariable('scoreWei2', [0, 10], 'Type', 'real')
+    optimizableVariable('refreshDirWei', [0, 1], 'Type', 'real')
+    optimizableVariable('scoreWei', [0, 10], 'Type', 'real')
     optimizableVariable('centerWei', [0, 2], 'Type', 'real')
     optimizableVariable('rad', [0, 15], 'Type', 'real')
     optimizableVariable('startPreNum', [2, 15], 'Type', 'real')
@@ -67,16 +65,13 @@ fprintf('最小目标函数值: %.4f\n', resultmax);
 
 %% 目标函数
 function FMI = TargetFunc2(weight1,weight2,weight3,weight4,initDirection1,initDirection2, ...
-                        refreshDirWei1,refreshDirWei2,scoreWei1,scoreWei2,centerWei,rad,startPreNum,PATH,trainIdx)
+                        refreshDirWei,scoreWei,centerWei,rad,startPreNum,PATH,trainIdx)
 
     % 参数设置
     decay = 0.000001; % 衰减因子
     
     weights = [weight1,weight2,weight3,weight4];
     initDirection = [initDirection1,initDirection2];
-    refreshDirWei = [refreshDirWei1,refreshDirWei2];
-    scoreWei = [scoreWei1,scoreWei2];
-    
     
     normalizedData = NormalizeDataFromFile(PATH,'LogNormalization');
     
